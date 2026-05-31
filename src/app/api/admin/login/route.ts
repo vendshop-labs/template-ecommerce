@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
-
-const COOKIE_NAME = 'admin_token';
-const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+import {
+  ADMIN_COOKIE,
+  ADMIN_TOKEN_MAX_AGE,
+  createAdminToken,
+  getAdminSecret,
+} from '@/lib/adminAuth';
 
 export async function POST(request: Request) {
   let email = '';
@@ -18,13 +21,13 @@ export async function POST(request: Request) {
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin123';
 
   if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    const token = Buffer.from(`${email}:${Date.now()}`).toString('base64');
+    const token = await createAdminToken(email, getAdminSecret());
     const res = NextResponse.json({ ok: true });
-    res.cookies.set(COOKIE_NAME, token, {
+    res.cookies.set(ADMIN_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: MAX_AGE,
+      maxAge: ADMIN_TOKEN_MAX_AGE,
       path: '/',
     });
     return res;
