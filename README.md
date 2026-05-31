@@ -12,11 +12,11 @@ Universal multi-region e-commerce template ("ElectroMarket") — a power-tools s
 > On Windows/exFAT drives, always install with `--config.node-linker=hoisted` and run `pnpm dev:clean` (kills stale Next dev processes + clears `.next`).
 
 ## Vercel Deploy
-Set these in **Vercel Dashboard → Settings → Environment Variables** (do **not** commit secrets):
+`vercel.json` contains **no secrets** — all 4 vars must be set in **Vercel Dashboard → Settings → Environment Variables**:
 - `REGION_BUNDLE=UA`
 - `ADMIN_EMAIL=your@email.com`
 - `ADMIN_PASSWORD=your_secure_password`
-- `ADMIN_SECRET=random_32_char_string`
+- `ADMIN_SECRET=random_32_char_string` (generate with: `openssl rand -hex 32`)
 
 ## Admin Access
 `/admin` → redirects to `/admin/login` when not authenticated.

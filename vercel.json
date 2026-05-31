@@ -3,8 +3,6 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "env": {
-    "REGION_BUNDLE": "UA",
-    "ADMIN_SECRET": "change_me_in_vercel_dashboard",
-    "_COMMENT": "ADMIN_EMAIL and ADMIN_PASSWORD must be set in Vercel dashboard Environment Variables (do not commit them). ADMIN_SECRET should also be overridden there."
+    "REGION_BUNDLE": "UA"
   }
 }
