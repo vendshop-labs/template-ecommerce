@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, type CSSProperties } from 'react';
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './ProductCard.module.css';
 
 export interface ProductCardProps {
@@ -123,7 +123,6 @@ export default function ProductCard({
   onFavorite,
 }: ProductCardProps) {
   const t = useTranslations('product');
-  const locale = useLocale();
   const [isFavorite, setIsFavorite] = useState(false);
 
   const handleFavorite = () => {
@@ -137,7 +136,7 @@ export default function ProductCard({
     oldPrice != null && oldPrice > price
       ? Math.round((1 - price / oldPrice) * 100)
       : null;
-  const href = `/${locale}/product/${slug}`;
+  const href = `/product/${slug}`;
 
   return (
     <article className={styles.card}>

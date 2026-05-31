@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import CartItem, { type CartItemData } from '@/components/cart/CartItem/CartItem';
 import OrderSummary from '@/components/cart/OrderSummary/OrderSummary';
 import styles from './CartPage.module.css';
@@ -67,7 +67,6 @@ function BigCartIcon() {
 export default function CartPage() {
   const t = useTranslations('cart');
   const tn = useTranslations('sampleProducts');
-  const locale = useLocale();
 
   const [items, setItems] = useState<CartSeed[]>(INITIAL_ITEMS);
 
@@ -95,7 +94,7 @@ export default function CartPage() {
             <BigCartIcon />
           </div>
           <h2 className={styles.emptyTitle}>{t('empty')}</h2>
-          <Link href={`/${locale}/catalog`} className={styles.emptyBtn}>
+          <Link href="/catalog" className={styles.emptyBtn}>
             {t('goToCatalog')}
           </Link>
         </div>
@@ -146,7 +145,7 @@ export default function CartPage() {
           </div>
 
           <div className={styles.foot}>
-            <Link href={`/${locale}/catalog`} className={styles.back}>
+            <Link href="/catalog" className={styles.back}>
               <ArrowLeft />
               {t('continueShopping')}
             </Link>

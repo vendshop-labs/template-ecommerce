@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './OrderSummary.module.css';
 
 export interface SummaryItem {
@@ -49,7 +49,6 @@ function LockIcon() {
 
 export default function OrderSummary({ items, currency }: OrderSummaryProps) {
   const t = useTranslations('cart');
-  const locale = useLocale();
 
   const { subtotal, discount, deliveryFee, deliveryFree, total } = useMemo(() => {
     // subtotal = list-price total (oldPrice where present, else the price itself).
@@ -100,7 +99,7 @@ export default function OrderSummary({ items, currency }: OrderSummaryProps) {
       </div>
 
       {hasItems ? (
-        <Link href={`/${locale}/checkout`} className={styles.btn}>
+        <Link href="/checkout" className={styles.btn}>
           <CartBtnIcon />
           {t('checkout')}
         </Link>

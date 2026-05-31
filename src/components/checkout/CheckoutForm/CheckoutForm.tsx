@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import styles from './CheckoutForm.module.css';
 
 type DeliveryMethod = 'branch' | 'courier' | 'pickup';
@@ -86,7 +86,6 @@ function SplitIcon() {
 
 export default function CheckoutForm() {
   const t = useTranslations('checkout');
-  const locale = useLocale();
   const router = useRouter();
 
   const [data, setData] = useState<FormData>({
@@ -128,7 +127,7 @@ export default function CheckoutForm() {
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean)) return;
     console.log('[checkout submit]', data);
-    router.push(`/${locale}/checkout/success`);
+    router.push('/checkout/success');
   };
 
   const field = (

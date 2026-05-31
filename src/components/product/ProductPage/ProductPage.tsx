@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import ImageGallery from '@/components/product/ImageGallery/ImageGallery';
 import ProductTabs, {
   type ProductTab,
@@ -131,7 +131,6 @@ const logCompare = (payload: { id: string }) => console.log('[compare]', payload
 
 export default function ProductPage({ product }: ProductPageProps) {
   const t = useTranslations('product');
-  const locale = useLocale();
 
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<ProductTab>('specs');
@@ -150,9 +149,9 @@ export default function ProductPage({ product }: ProductPageProps) {
     <div className={styles.page}>
       {/* Breadcrumb */}
       <nav className={styles.crumbs} aria-label={t('breadcrumbCatalog')}>
-        <Link href={`/${locale}`}>{t('breadcrumbHome')}</Link>
+        <Link href="/">{t('breadcrumbHome')}</Link>
         <span className={styles.crumbSep}>/</span>
-        <Link href={`/${locale}/catalog`}>{t('breadcrumbCatalog')}</Link>
+        <Link href="/catalog">{t('breadcrumbCatalog')}</Link>
         <span className={styles.crumbSep}>/</span>
         <span className={styles.crumbCurrent}>{product.name}</span>
       </nav>

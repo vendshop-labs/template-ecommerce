@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import CartBadge from './CartBadge';
 import styles from './Header.module.css';
 
@@ -25,7 +25,6 @@ export default function Header({
   compareCount = 0,
 }: HeaderProps) {
   const t = useTranslations('Header');
-  const locale = useLocale();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen((open) => !open);
@@ -133,7 +132,7 @@ export default function Header({
           </a>
 
           {/* Catalog button */}
-          <Link href={`/${locale}/catalog`} className={styles.catalog}>
+          <Link href="/catalog" className={styles.catalog}>
             <svg
               width="20"
               height="20"
@@ -168,7 +167,7 @@ export default function Header({
 
           {/* Action icons */}
           <nav className={styles.actions} aria-label={t('menu')}>
-            <Link className={styles.action} href={`/${locale}/login`}>
+            <Link className={styles.action} href="/login">
               <span className={styles.actionIcon}>
                 <svg
                   width="24"
@@ -188,7 +187,7 @@ export default function Header({
               <span className={styles.actionLabel}>{t('login')}</span>
             </Link>
 
-            <Link className={styles.action} href={`/${locale}/compare`}>
+            <Link className={styles.action} href="/compare">
               <span className={styles.actionIcon}>
                 <svg
                   width="24"
@@ -211,7 +210,7 @@ export default function Header({
               <span className={styles.actionLabel}>{t('compare')}</span>
             </Link>
 
-            <Link className={styles.action} href={`/${locale}/favorites`}>
+            <Link className={styles.action} href="/favorites">
               <span className={styles.actionIcon}>
                 <svg
                   width="24"
@@ -233,7 +232,7 @@ export default function Header({
               <span className={styles.actionLabel}>{t('favorites')}</span>
             </Link>
 
-            <Link className={`${styles.action} ${styles.cart}`} href={`/${locale}/cart`}>
+            <Link className={`${styles.action} ${styles.cart}`} href="/cart">
               <span className={styles.actionIcon}>
                 <svg
                   width="24"
@@ -262,7 +261,7 @@ export default function Header({
       {isMenuOpen && (
         <div className={styles.mobileMenu}>
           <Link
-            href={`/${locale}/catalog`}
+            href="/catalog"
             className={styles.mobileCatalog}
             onClick={() => setIsMenuOpen(false)}
           >
@@ -298,16 +297,16 @@ export default function Header({
           </form>
 
           <nav className={styles.mobileNav}>
-            <Link href={`/${locale}/login`} onClick={() => setIsMenuOpen(false)}>
+            <Link href="/login" onClick={() => setIsMenuOpen(false)}>
               {t('login')}
             </Link>
-            <Link href={`/${locale}/compare`} onClick={() => setIsMenuOpen(false)}>
+            <Link href="/compare" onClick={() => setIsMenuOpen(false)}>
               {t('compare')}
             </Link>
-            <Link href={`/${locale}/favorites`} onClick={() => setIsMenuOpen(false)}>
+            <Link href="/favorites" onClick={() => setIsMenuOpen(false)}>
               {t('favorites')}
             </Link>
-            <Link href={`/${locale}/cart`} onClick={() => setIsMenuOpen(false)}>
+            <Link href="/cart" onClick={() => setIsMenuOpen(false)}>
               {t('cart')}
             </Link>
           </nav>

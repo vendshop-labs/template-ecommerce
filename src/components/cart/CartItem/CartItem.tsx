@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './CartItem.module.css';
 
 export interface CartItemData {
@@ -69,10 +69,9 @@ function TrashIcon() {
 export default function CartItem({ item, onQuantityChange, onDelete, onCheck }: CartItemProps) {
   const t = useTranslations('cart');
   const tp = useTranslations('product');
-  const locale = useLocale();
 
   const formatPrice = (value: number) => new Intl.NumberFormat('uk-UA').format(value);
-  const href = `/${locale}/product/${item.slug}`;
+  const href = `/product/${item.slug}`;
   const clamp = (v: number) => Math.max(1, Math.min(99, Math.floor(v) || 1));
 
   return (

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './OrderSuccess.module.css';
 
 // Confetti pieces — fixed positions/colours so render is deterministic; only the
@@ -20,7 +20,6 @@ const CONFETTI = [
 
 export default function OrderSuccess() {
   const t = useTranslations('checkout');
-  const locale = useLocale();
 
   // Generated client-side after mount so SSR and client markup match (no
   // hydration mismatch from Math.random()).
@@ -57,10 +56,10 @@ export default function OrderSuccess() {
         <p className={styles.message}>{t('successMessage')}</p>
 
         <div className={styles.actions}>
-          <Link href={`/${locale}/catalog`} className={styles.btnPrimary}>
+          <Link href="/catalog" className={styles.btnPrimary}>
             {t('continueShopping')}
           </Link>
-          <Link href={`/${locale}`} className={styles.btnSecondary}>
+          <Link href="/" className={styles.btnSecondary}>
             {t('backToHome')}
           </Link>
         </div>

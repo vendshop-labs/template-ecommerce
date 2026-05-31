@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './Footer.module.css';
 
 export interface FooterProps {
@@ -75,7 +75,6 @@ export default function Footer({
 }: FooterProps) {
   const t = useTranslations('footer');
   const tc = useTranslations('categories');
-  const locale = useLocale();
   const telHref = `tel:${phone.replace(/[^+\d]/g, '')}`;
 
   return (
@@ -103,13 +102,13 @@ export default function Footer({
           <h3 className={styles.colTitle}>{t('catalog')}</h3>
           <ul className={styles.links}>
             <li>
-              <Link className={styles.link} href={`/${locale}/catalog`}>
+              <Link className={styles.link} href="/catalog">
                 {t('allCategories')}
               </Link>
             </li>
             {CATALOG_CATEGORIES.map((cat) => (
               <li key={cat}>
-                <Link className={styles.link} href={`/${locale}/catalog?category=${cat}`}>
+                <Link className={styles.link} href={`/catalog?category=${cat}`}>
                   {tc(cat)}
                 </Link>
               </li>
