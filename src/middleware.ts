@@ -1,18 +1,13 @@
 import createMiddleware from 'next-intl/middleware';
-import { getActiveLocales, getDefaultLocale } from './config';
+import { routing } from './i18n/routing';
 
-// The middleware negotiates only the *active* region bundle's locales. Locales
-// that ship in the template but aren't part of the active bundle are simply not
-// routed — flipping `REGION_BUNDLE` changes this at runtime, no rebuild needed.
-export default createMiddleware({
-  locales: getActiveLocales(),
-  defaultLocale: getDefaultLocale(),
-});
+// Drives locale negotiation off the shared `routing` config — the same object
+// used by the navigation helpers, so prefixing never drifts. All six locales
+// are routable; REGION_BUNDLE does not affect routing.
+export default createMiddleware(routing);
 
 export const config = {
-  // Match all pathnames except for
-  // - API routes
-  // - Next.js internals (_next, _vercel)
-  // - files with an extension (e.g. favicon.ico)
+  // Match all pathnames except API routes, Next.js internals, and files with an
+  // extension (e.g. favicon.ico).
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
 };
