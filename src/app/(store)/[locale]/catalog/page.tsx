@@ -37,5 +37,5 @@ export default async function CatalogRoute({
     isNew: p.isNew,
   }));
 
-  return <CatalogPage products={products} />;
+  return <CatalogPage products={products} totalFound={products.length} totalPages={Math.ceil(products.length / 9)} />;
 }

@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import CategoryPage from '@/components/category/CategoryPage/CategoryPage';
 import type { CatalogProduct } from '@/components/catalog/CatalogPage/CatalogPage';
-import { SAMPLE_PRODUCTS, isCategoryId } from '@/data/products';
+import type { CategoryId } from '@/components/home/CategoriesGrid/CategoriesGrid';
+import { db } from '@/lib/db';
+
+const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export async function generateMetadata({
   params,
@@ -11,9 +14,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  if (!isCategoryId(slug)) return {};
+  const store = await db.store.findUnique({ where: { slug: STORE_SLUG } });
+  if (!store) return {};
+  const category = await db.category.findFirst({ where: { storeId: store.id, slug } });
+  if (!category) return {};
   const tc = await getTranslations({ locale, namespace: 'categories' });
-  return { title: tc(slug) };
+  return { title: tc(category.nameKey) };
 }
 
 export default async function CategoryRoute({
@@ -24,12 +30,32 @@ export default async function CategoryRoute({
   const { locale, slug } = await params;
   setRequestLocale(locale);
 
-  if (!isCategoryId(slug)) notFound();
+  const store = await db.store.findUniqueOrThrow({ where: { slug: STORE_SLUG } });
+  const category = await db.category.findFirst({ where: { storeId: store.id, slug } });
+  if (!category) notFound();
 
   const t = await getTranslations('sampleProducts');
-  const products: CatalogProduct[] = SAMPLE_PRODUCTS.filter((p) => p.category === slug).map(
-    ({ nameKey, brandSlug: _b, category: _c, ...rest }) => ({ ...rest, name: t(nameKey) }),
-  );
 
-  return <CategoryPage slug={slug} products={products} />;
+  const dbProducts = await db.product.findMany({
+    where: { storeId: store.id, categoryId: category.id },
+    orderBy: { reviewCount: 'desc' },
+  });
+
+  const products: CatalogProduct[] = dbProducts.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    brand: p.brand ?? '',
+    name: t(p.nameKey),
+    image: p.image ?? '/placeholder-product.svg',
+    price: p.price,
+    oldPrice: p.oldPrice ?? undefined,
+    currency: p.currency,
+    rating: p.rating,
+    reviewCount: p.reviewCount,
+    inStock: p.inStock,
+    isHit: p.isHit,
+    isNew: p.isNew,
+  }));
+
+  return <CategoryPage slug={slug as CategoryId} products={products} />;
 }
