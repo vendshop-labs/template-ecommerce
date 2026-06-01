@@ -1,90 +1,89 @@
-'use client';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import HomeClient, { type ProductData } from '@/components/home/HomeClient/HomeClient';
+import { db } from '@/lib/db';
 
-import { useTranslations } from 'next-intl';
-import CategoriesGrid from '@/components/home/CategoriesGrid/CategoriesGrid';
-import BestSellers from '@/components/home/BestSellers/BestSellers';
-import ProductOfDay from '@/components/home/ProductOfDay/ProductOfDay';
-import BrandsSection from '@/components/home/BrandsSection/BrandsSection';
-import TrustStrip from '@/components/home/TrustStrip/TrustStrip';
-import SubscribeBanner from '@/components/home/SubscribeBanner/SubscribeBanner';
-import PopularTags from '@/components/home/PopularTags/PopularTags';
-import type { ProductCardProps } from '@/components/catalog/ProductCard/ProductCard';
-import styles from './page.module.css';
+const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
-// Placeholder handlers — swap for real cart/compare/wishlist/navigation later.
-const onAddToCart = (id: string) => console.log('[addToCart]', id);
-const onCompare = (id: string) => console.log('[compare]', id);
-const onFavorite = (id: string) => console.log('[favorite]', id);
-const onViewAll = () => console.log('[viewAll] best sellers');
-const onCategoryClick = (category: string) => console.log('[category]', category);
-const onBrandClick = (brand: string) => console.log('[brand]', brand);
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
 
-// Sample data. Product names are localized at render via `sampleProducts.*`
-// i18n keys (`nameKey`) so they follow the active locale; callbacks are attached
-// at render too. Everything else (brand, prices) is locale-independent data.
-type ProductSeed = Omit<
-  ProductCardProps,
-  'onAddToCart' | 'onCompare' | 'onFavorite' | 'name'
-> & { nameKey: string };
+  const t = await getTranslations('sampleProducts');
 
-const PRODUCTS: ProductSeed[] = [
-  { id: '1', slug: 'makita-df333dsae', brand: 'MAKITA', nameKey: 'makitaDrill', image: '/placeholder-product.svg', price: 2990, oldPrice: 3499, currency: 'грн', rating: 4.5, reviewCount: 127, inStock: true, isHit: true },
-  { id: '2', slug: 'dewalt-dwe4157', brand: 'DEWALT', nameKey: 'dewaltGrinder', image: '/placeholder-product.svg', price: 3199, oldPrice: 4099, currency: 'грн', rating: 4, reviewCount: 56, inStock: true, isHit: true },
-  { id: '3', slug: 'metabo-steb-65', brand: 'METABO', nameKey: 'metaboJigsaw', image: '/placeholder-product.svg', price: 4290, currency: 'грн', rating: 5, reviewCount: 38, inStock: true, isNew: true },
-  { id: '4', slug: 'milwaukee-m18-fiw2f12', brand: 'MILWAUKEE', nameKey: 'milwaukeeImpact', image: '/placeholder-product.svg', price: 8999, oldPrice: 10999, currency: 'грн', rating: 4.5, reviewCount: 91, inStock: true, isHit: true },
-];
+  // Fetch bestsellers and product-of-day from DB
+  const store = await db.store.findUniqueOrThrow({ where: { slug: STORE_SLUG } });
 
-const PRODUCT_OF_DAY_SEED = {
-  id: 'pod-bosch-gbh',
-  brand: 'BOSCH',
-  nameKey: 'boschPerforator',
-  image: '/placeholder-product.svg',
-  price: 2490,
-  oldPrice: 5499,
-  currency: 'грн',
-  stockLeft: 7,
-  // Computed once at module load so the countdown target stays fixed across renders.
-  endsAt: new Date(Date.now() + ((2 * 24 + 14) * 3600 + 37 * 60 + 22) * 1000),
-};
+  const [hitProducts, podPromotion] = await Promise.all([
+    db.product.findMany({
+      where: { storeId: store.id, isHit: true, inStock: true },
+      orderBy: { reviewCount: 'desc' },
+      take: 4,
+    }),
+    db.promotion.findFirst({
+      where: { storeId: store.id, type: 'PRODUCT_OF_DAY', active: true },
+    }),
+  ]);
 
-export default function HomePage() {
-  const t = useTranslations('sampleProducts');
-
-  const products: ProductCardProps[] = PRODUCTS.map(({ nameKey, ...product }) => ({
-    ...product,
-    name: t(nameKey),
-    onAddToCart,
-    onCompare,
-    onFavorite,
+  const products: ProductData[] = hitProducts.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    brand: p.brand ?? '',
+    name: t(p.nameKey),
+    image: p.image ?? '/placeholder-product.svg',
+    price: p.price,
+    oldPrice: p.oldPrice ?? undefined,
+    currency: p.currency,
+    rating: p.rating,
+    reviewCount: p.reviewCount,
+    inStock: p.inStock,
+    isHit: p.isHit,
+    isNew: p.isNew,
   }));
 
-  const { nameKey: podNameKey, ...podRest } = PRODUCT_OF_DAY_SEED;
-  const productOfDay = { ...podRest, name: t(podNameKey) };
+  // Fetch product-of-day product
+  let podProduct: ProductData | null = null;
+  if (podPromotion?.productIds.length) {
+    const pod = await db.product.findFirst({
+      where: { id: podPromotion.productIds[0], storeId: store.id },
+    });
+    if (pod) {
+      podProduct = {
+        id: pod.id,
+        slug: pod.slug,
+        brand: pod.brand ?? '',
+        name: t(pod.nameKey),
+        image: pod.image ?? '/placeholder-product.svg',
+        price: podPromotion.discountPercent
+          ? Math.round(pod.price * (1 - podPromotion.discountPercent / 100))
+          : pod.price,
+        oldPrice: pod.price,
+        currency: pod.currency,
+        rating: pod.rating,
+        reviewCount: pod.reviewCount,
+        inStock: pod.inStock,
+        isHit: pod.isHit,
+        isNew: pod.isNew,
+      };
+    }
+  }
 
-  return (
-    <>
-      {/* 1 — Categories */}
-      <CategoriesGrid onCategoryClick={onCategoryClick} />
+  // Fallback: use first hit product as product-of-day
+  const productOfDayBase = podProduct ?? products[0];
 
-      {/* 2 — Best Sellers (70%) + Product of the Day (30%) */}
-      <section className={styles.bestSellersSection}>
-        <div className={styles.bestSellersWrap}>
-          <BestSellers products={products} onViewAll={onViewAll} />
-          <ProductOfDay product={productOfDay} onAddToCart={onAddToCart} />
-        </div>
-      </section>
+  const productOfDay = {
+    id: productOfDayBase?.id ?? 'pod',
+    brand: productOfDayBase?.brand ?? 'BOSCH',
+    name: productOfDayBase?.name ?? 'Product of the Day',
+    image: productOfDayBase?.image ?? '/placeholder-product.svg',
+    price: productOfDayBase?.price ?? 2490,
+    oldPrice: productOfDayBase?.oldPrice ?? productOfDayBase?.price ?? 5499,
+    currency: productOfDayBase?.currency ?? 'грн',
+    stockLeft: 7,
+  };
 
-      {/* 3 — Brands */}
-      <BrandsSection onBrandClick={onBrandClick} />
-
-      {/* 4 — Trust strip */}
-      <TrustStrip />
-
-      {/* 5 — Subscribe banner */}
-      <SubscribeBanner />
-
-      {/* 6 — Popular tags */}
-      <PopularTags />
-    </>
-  );
+  return <HomeClient products={products} productOfDay={productOfDay} />;
 }

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { useCartStore } from '@/stores/useCartStore';
 import styles from './CheckoutForm.module.css';
 
 type DeliveryMethod = 'branch' | 'courier' | 'pickup';
@@ -100,6 +101,7 @@ export default function CheckoutForm() {
     comment: '',
   });
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [submitting, setSubmitting] = useState(false);
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
@@ -117,7 +119,7 @@ export default function CheckoutForm() {
     { value: 'installments', label: t('installments'), icon: <SplitIcon /> },
   ];
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const nextErrors: Record<string, boolean> = {
       firstName: !data.firstName.trim(),
@@ -126,8 +128,23 @@ export default function CheckoutForm() {
     };
     setErrors(nextErrors);
     if (Object.values(nextErrors).some(Boolean)) return;
-    console.log('[checkout submit]', data);
-    router.push('/checkout/success');
+
+    setSubmitting(true);
+    try {
+      const cartItems = useCartStore.getState().items;
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, items: cartItems }),
+      });
+      if (!res.ok) throw new Error(`Order failed: ${res.status}`);
+      useCartStore.getState().clearCart();
+      router.push('/checkout/success');
+    } catch (err) {
+      console.error('[checkout]', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const field = (
@@ -250,8 +267,8 @@ export default function CheckoutForm() {
         />
       </section>
 
-      <button type="submit" className={styles.submit}>
-        {t('submit')}
+      <button type="submit" className={styles.submit} disabled={submitting}>
+        {submitting ? '...' : t('submit')}
       </button>
     </form>
   );
