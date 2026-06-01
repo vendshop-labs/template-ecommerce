@@ -353,8 +353,40 @@ export async function POST(req: Request) {
   return transport.handleRequest(req);
 }
 
-// GET — MCP SSE stream / capability discovery
+// GET — browser: info JSON; MCP client: SSE stream
 export async function GET(req: Request) {
+  const accept = req.headers.get('accept') ?? '';
+
+  // Browser / health-check request — return human-readable info
+  if (!accept.includes('text/event-stream')) {
+    return Response.json({
+      name: 'emarket-mcp',
+      version: '1.0.0',
+      status: 'ok',
+      transport: 'Streamable HTTP (MCP 2025)',
+      endpoint: '/api/mcp',
+      tools: [
+        'get_products',
+        'update_product_price',
+        'get_orders',
+        'update_order_status',
+        'get_customers',
+        'get_analytics',
+        'create_promotion',
+        'search_knowledge',
+      ],
+      claudeDesktopConfig: {
+        mcpServers: {
+          emarket: {
+            command: 'npx',
+            args: ['mcp-remote', 'https://vendshop-template-ecommerce.vercel.app/api/mcp'],
+          },
+        },
+      },
+    });
+  }
+
+  // MCP client SSE request
   const server = createServer();
   const transport = buildTransport();
   await server.connect(transport);
