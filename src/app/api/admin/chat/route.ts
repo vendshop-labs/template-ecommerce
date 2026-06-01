@@ -119,6 +119,19 @@ const TOOLS = [
       required: ['query'],
     },
   },
+  {
+    name: 'bulk_update_prices',
+    description: 'Bulk update prices for multiple products by percentage. Use this when user asks to change prices for a brand, category, or all products. Positive percent = increase, negative = decrease.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        brand:    { type: 'string', description: 'Filter by brand (e.g. "Makita", "Bosch")' },
+        category: { type: 'string', description: 'Filter by category slug' },
+        percent:  { type: 'number', description: 'Price change in percent. +10 = increase 10%, -5 = decrease 5%' },
+      },
+      required: ['percent'],
+    },
+  },
 ] as const;
 
 // ─── OpenAI tool format converter ──────────────────────────────────────────
@@ -141,7 +154,8 @@ interface UpdateOrderParams     { orderId: string; status: string; trackingNumbe
 interface GetCustomersParams    { sortBy?: 'orders' | 'revenue' | 'recent'; limit?: number }
 interface GetAnalyticsParams    { period?: string }
 interface CreatePromoParams     { type: string; title: string; description?: string; discountPercent?: number; productIds?: string[]; endsAt?: string }
-interface SearchKnowledgeParams { query: string }
+interface SearchKnowledgeParams  { query: string }
+interface BulkUpdatePricesParams { brand?: string; category?: string; percent: number }
 
 type ToolParams =
   | { name: 'get_products';         input: GetProductsParams }
@@ -152,6 +166,7 @@ type ToolParams =
   | { name: 'get_analytics';        input: GetAnalyticsParams }
   | { name: 'create_promotion';     input: CreatePromoParams }
   | { name: 'search_knowledge';     input: SearchKnowledgeParams }
+  | { name: 'bulk_update_prices';   input: BulkUpdatePricesParams }
   | { name: string;                 input: Record<string, unknown> };
 
 function buildDateFilter(period?: string): { createdAt?: { gte: Date } } {
@@ -320,6 +335,37 @@ async function executeTool(tool: ToolParams): Promise<string> {
       return entries.length > 0
         ? entries.map((e) => `**${e.title}**\n${e.content}`).join('\n\n')
         : `Nothing found for: "${p.query}"`;
+    }
+
+    case 'bulk_update_prices': {
+      const p = tool.input as BulkUpdatePricesParams;
+      const products = await db.product.findMany({
+        where: {
+          storeId: store.id,
+          ...(p.brand    ? { brand: { equals: p.brand, mode: 'insensitive' } } : {}),
+          ...(p.category ? { category: { slug: p.category } } : {}),
+        },
+      });
+
+      if (products.length === 0) return 'No products found matching the filter.';
+
+      const multiplier = 1 + (p.percent / 100);
+      const results: Array<{ name: string; oldPrice: number; newPrice: number }> = [];
+
+      for (const product of products) {
+        const newPrice = Math.round(product.price * multiplier * 100) / 100;
+        await db.product.update({
+          where: { id: product.id },
+          data: { oldPrice: product.price, price: newPrice },
+        });
+        results.push({ name: product.nameKey, oldPrice: product.price, newPrice });
+      }
+
+      const direction = p.percent > 0 ? 'increased' : 'decreased';
+      return JSON.stringify({
+        message: `${results.length} products ${direction} by ${Math.abs(p.percent)}%`,
+        products: results,
+      });
     }
 
     default:
