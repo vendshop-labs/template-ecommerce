@@ -8,7 +8,12 @@
     "login": "Sign in",
     "compare": "Compare",
     "favorites": "Favorites",
-    "cart": "Cart"
+    "cart": "Cart",
+    "restaurantMenu": "Menu",
+    "restaurantReservations": "Reservations",
+    "restaurantGallery": "Gallery",
+    "restaurantAbout": "About",
+    "restaurantContacts": "Contacts"
   },
   "categories": {
     "title": "Categories",

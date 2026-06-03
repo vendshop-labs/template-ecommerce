@@ -8,7 +8,12 @@
     "login": "Prihlásiť sa",
     "compare": "Porovnať",
     "favorites": "Obľúbené",
-    "cart": "Košík"
+    "cart": "Košík",
+    "restaurantMenu": "Jedálny lístok",
+    "restaurantReservations": "Rezervácia",
+    "restaurantGallery": "Galéria",
+    "restaurantAbout": "O nás",
+    "restaurantContacts": "Kontakt"
   },
   "categories": {
     "title": "Kategórie",

@@ -8,7 +8,12 @@
     "login": "Увійти",
     "compare": "Порівняння",
     "favorites": "Обране",
-    "cart": "Кошик"
+    "cart": "Кошик",
+    "restaurantMenu": "Меню",
+    "restaurantReservations": "Бронювання",
+    "restaurantGallery": "Галерея",
+    "restaurantAbout": "Про нас",
+    "restaurantContacts": "Контакти"
   },
   "categories": {
     "title": "Категорії",

@@ -57,7 +57,7 @@ export default async function LocaleLayout({
       <body style={cssVars as React.CSSProperties}>
         <NextIntlClientProvider messages={messages}>
           <VerticalProvider config={config.vertical}>
-            <Header storeName={config.name} />
+            <Header storeName={config.name} vertical={config.vertical.vertical} />
             <main>{children}</main>
             <Footer storeName={config.name} />
           </VerticalProvider>

@@ -8,7 +8,12 @@
     "login": "Anmelden",
     "compare": "Vergleichen",
     "favorites": "Favoriten",
-    "cart": "Warenkorb"
+    "cart": "Warenkorb",
+    "restaurantMenu": "Speisekarte",
+    "restaurantReservations": "Reservierung",
+    "restaurantGallery": "Galerie",
+    "restaurantAbout": "Über uns",
+    "restaurantContacts": "Kontakt"
   },
   "categories": {
     "title": "Kategorien",

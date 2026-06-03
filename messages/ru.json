@@ -8,7 +8,12 @@
     "login": "Войти",
     "compare": "Сравнение",
     "favorites": "Избранное",
-    "cart": "Корзина"
+    "cart": "Корзина",
+    "restaurantMenu": "Меню",
+    "restaurantReservations": "Бронирование",
+    "restaurantGallery": "Галерея",
+    "restaurantAbout": "О нас",
+    "restaurantContacts": "Контакты"
   },
   "categories": {
     "title": "Категории",
