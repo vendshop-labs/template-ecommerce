@@ -1,6 +1,7 @@
 'use client';
 
 import HeroSection from '@/components/home/HeroSection/HeroSection';
+import MenuCategories from '@/components/home/MenuCategories/MenuCategories';
 import CategoriesGrid from '@/components/home/CategoriesGrid/CategoriesGrid';
 import BestSellers from '@/components/home/BestSellers/BestSellers';
 import ProductOfDay from '@/components/home/ProductOfDay/ProductOfDay';
@@ -95,9 +96,11 @@ export default function HomeClient({ products, productOfDay, storeName }: HomeCl
               />
             );
 
+          case 'menu-categories':
+            return <MenuCategories key={section} />;
+
           // Future vertical sections — not yet implemented
           case 'delivery-zones':
-          case 'menu-categories':
           case 'daily-specials':
           case 'reservations':
             return null;

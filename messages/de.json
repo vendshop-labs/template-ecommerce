@@ -254,5 +254,18 @@
     "orderNow": "Jetzt bestellen",
     "googleRating": "4.8 bei Google",
     "openUntil": "Geöffnet bis 23:00"
+  },
+  "menuCategories": {
+    "tagline": "— UNSERE SPEISEKARTE —",
+    "title": "Entdecken Sie unsere Küche",
+    "subtitle": "Von handgemachter Pasta bis zur Holzofenpizza — jedes Gericht erzählt eine Geschichte",
+    "dishes": "Gerichte",
+    "viewAll": "Vollständige Speisekarte",
+    "antipasti": "Antipasti",
+    "primi": "Primi Piatti",
+    "secondi": "Secondi",
+    "pizza": "Pizza",
+    "dolci": "Dolci",
+    "bevande": "Getränke"
   }
 }

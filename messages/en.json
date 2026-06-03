@@ -254,5 +254,18 @@
     "orderNow": "Order Now",
     "googleRating": "4.8 on Google",
     "openUntil": "Open until 23:00"
+  },
+  "menuCategories": {
+    "tagline": "— OUR MENU —",
+    "title": "Explore Our Cuisine",
+    "subtitle": "From handmade pasta to wood-fired pizza — each dish tells a story",
+    "dishes": "dishes",
+    "viewAll": "View Full Menu",
+    "antipasti": "Antipasti",
+    "primi": "Primi Piatti",
+    "secondi": "Secondi",
+    "pizza": "Pizza",
+    "dolci": "Dolci",
+    "bevande": "Bevande"
   }
 }

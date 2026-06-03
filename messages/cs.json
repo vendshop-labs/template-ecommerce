@@ -254,5 +254,18 @@
     "orderNow": "Objednat",
     "googleRating": "4.8 na Google",
     "openUntil": "Otevřeno do 23:00"
+  },
+  "menuCategories": {
+    "tagline": "— NAŠE MENU —",
+    "title": "Objevte naši kuchyni",
+    "subtitle": "Od domácích těstovin po pizzu z dřevěné pece — každé jídlo vypráví příběh",
+    "dishes": "jídel",
+    "viewAll": "Celé menu",
+    "antipasti": "Antipasti",
+    "primi": "Primi Piatti",
+    "secondi": "Secondi",
+    "pizza": "Pizza",
+    "dolci": "Dolci",
+    "bevande": "Nápoje"
   }
 }
