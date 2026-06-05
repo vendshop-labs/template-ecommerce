@@ -22,34 +22,75 @@ function text(content: unknown) {
 }
 
 // ─── Build MCP server (stateless — new instance per request) ──────────────
-function createServer() {
+async function createServer() {
   const server = new McpServer({ name: 'emarket-mcp', version: '1.0.0' });
+
+  // ── Load store metadata for dynamic tool descriptions ──────────────────
+  const store = await db.store.findUniqueOrThrow({
+    where: { slug: STORE_SLUG },
+    select: { id: true, name: true, slug: true, vertical: true },
+  });
+
+  const categories = await db.category.findMany({
+    where: { storeId: store.id },
+    orderBy: { sortOrder: 'asc' },
+    select: { slug: true, nameKey: true },
+  });
+
+  const isRestaurant = store.vertical === 'RESTAURANT';
+
+  const sampleProduct = await db.product.findFirst({
+    where: { storeId: store.id },
+    select: { currency: true },
+  });
+  const currency = sampleProduct?.currency ?? 'UAH';
+  const currencyLabel = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : 'грн';
+
+  let brands: string[] = [];
+  if (!isRestaurant) {
+    const brandResults = await db.product.findMany({
+      where: { storeId: store.id, brand: { not: null } },
+      select: { brand: true },
+      distinct: ['brand'],
+    });
+    brands = brandResults.map((b) => b.brand!).filter(Boolean).sort();
+  }
+
+  const categorySlugs = categories.map((c) => c.slug).join(', ');
+  const categoryDesc = categories.map((c) => `${c.slug} (${c.nameKey})`).join(', ');
+  const brandDesc = brands.join(', ');
+
+  const productLabel = isRestaurant ? 'блюда/напитки' : 'товары';
+  const storeLabel = isRestaurant ? 'ресторана' : 'магазина';
 
   // ── PRODUCTS ──────────────────────────────────────────────────────────────
 
   server.registerTool(
     'get_products',
     {
-      description: 'Получить список продуктов магазина с фильтрами',
+      description: `Получить список ${productLabel} ${storeLabel} «${store.name}» с фильтрами`,
       inputSchema: {
-        category:  z.string().optional().describe('Slug категории: drills, grinders, perforators, jigsaws, sanders, lasers, measuring, accessories'),
-        brand:     z.string().optional().describe('Бренд: Makita, Bosch, DeWalt, Milwaukee, Metabo'),
-        inStock:   z.boolean().optional().describe('Только в наличии'),
-        maxPrice:  z.number().optional().describe('Максимальная цена (грн)'),
-        page:      z.number().optional().describe('Страница (default: 1)'),
-        limit:     z.number().optional().describe('Продуктов на страницу (default: 20)'),
+        category: z.string().optional().describe(`Slug категории: ${categoryDesc || categorySlugs}`),
+        ...(brands.length > 0
+          ? { brand: z.string().optional().describe(`Бренд: ${brandDesc}`) }
+          : {}),
+        inStock: z.boolean().optional().describe('Только в наличии'),
+        maxPrice: z.number().optional().describe(`Максимальная цена (${currencyLabel})`),
+        page: z.number().optional().describe('Страница (default: 1)'),
+        limit: z.number().optional().describe(`${isRestaurant ? 'Блюд' : 'Товаров'} на страницу (default: 20)`),
       },
     },
     async (params) => {
       const page = params.page ?? 1;
       const limit = params.limit ?? 20;
+      const brand = (params as Record<string, unknown>).brand as string | undefined;
 
       const [products, total] = await Promise.all([
         db.product.findMany({
           where: {
             store: { slug: STORE_SLUG },
             ...(params.category ? { category: { slug: params.category } } : {}),
-            ...(params.brand ? { brand: { equals: params.brand, mode: 'insensitive' } } : {}),
+            ...(brand ? { brand: { equals: brand, mode: 'insensitive' } } : {}),
             ...(params.inStock !== undefined ? { inStock: params.inStock } : {}),
             ...(params.maxPrice ? { price: { lte: params.maxPrice } } : {}),
           },
@@ -62,7 +103,7 @@ function createServer() {
           where: {
             store: { slug: STORE_SLUG },
             ...(params.category ? { category: { slug: params.category } } : {}),
-            ...(params.brand ? { brand: { equals: params.brand, mode: 'insensitive' } } : {}),
+            ...(brand ? { brand: { equals: brand, mode: 'insensitive' } } : {}),
             ...(params.inStock !== undefined ? { inStock: params.inStock } : {}),
             ...(params.maxPrice ? { price: { lte: params.maxPrice } } : {}),
           },
@@ -70,17 +111,17 @@ function createServer() {
       ]);
 
       return text({ products, total, page, totalPages: Math.ceil(total / limit) });
-    }
+    },
   );
 
   server.registerTool(
     'update_product_price',
     {
-      description: 'Изменить цену продукта',
+      description: `Изменить цену ${isRestaurant ? 'блюда' : 'продукта'}`,
       inputSchema: {
-        productId: z.string().describe('ID продукта из БД'),
-        newPrice:  z.number().describe('Новая цена (грн)'),
-        oldPrice:  z.number().optional().describe('Старая цена для показа скидки'),
+        productId: z.string().describe('ID из БД'),
+        newPrice: z.number().describe(`Новая цена (${currencyLabel})`),
+        oldPrice: z.number().optional().describe(`Старая цена для показа скидки (${currencyLabel})`),
       },
     },
     async (params) => {
@@ -93,7 +134,7 @@ function createServer() {
       });
       revalidatePath('/', 'layout');
       return text(`Цена обновлена: ${product.nameKey} → ${product.price} ${product.currency}`);
-    }
+    },
   );
 
   // ── ORDERS ────────────────────────────────────────────────────────────────
@@ -101,11 +142,11 @@ function createServer() {
   server.registerTool(
     'get_orders',
     {
-      description: 'Получить список заказов магазина',
+      description: `Получить список заказов ${storeLabel} «${store.name}»`,
       inputSchema: {
         status: z.enum(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']).optional(),
         period: z.enum(['today', 'week', 'month', 'all']).optional().describe('Временной период (default: all)'),
-        limit:  z.number().optional().describe('Количество заказов (default: 20)'),
+        limit: z.number().optional().describe('Количество заказов (default: 20)'),
       },
     },
     async (params) => {
@@ -133,7 +174,7 @@ function createServer() {
       });
 
       return text(orders);
-    }
+    },
   );
 
   server.registerTool(
@@ -141,10 +182,10 @@ function createServer() {
     {
       description: 'Обновить статус заказа и добавить номер отслеживания',
       inputSchema: {
-        orderId:       z.string().describe('ID заказа из БД'),
-        status:        z.enum(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']),
+        orderId: z.string().describe('ID заказа из БД'),
+        status: z.enum(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']),
         trackingNumber: z.string().optional().describe('Номер ТТН (для статуса SHIPPED)'),
-        internalNote:  z.string().optional().describe('Внутренняя заметка для менеджеров'),
+        internalNote: z.string().optional().describe('Внутренняя заметка для менеджеров'),
       },
     },
     async (params) => {
@@ -159,7 +200,7 @@ function createServer() {
       });
       revalidatePath('/', 'layout');
       return text(`Заказ ${order.orderNumber} → ${order.status}${order.trackingNumber ? ` (TTN: ${order.trackingNumber})` : ''}`);
-    }
+    },
   );
 
   // ── CUSTOMERS ─────────────────────────────────────────────────────────────
@@ -170,7 +211,7 @@ function createServer() {
       description: 'Список клиентов с аналитикой по заказам и revenue',
       inputSchema: {
         sortBy: z.enum(['orders', 'revenue', 'recent']).optional().describe('Сортировка клиентов'),
-        limit:  z.number().optional().describe('Количество (default: 20)'),
+        limit: z.number().optional().describe('Количество (default: 20)'),
       },
     },
     async (params) => {
@@ -194,7 +235,7 @@ function createServer() {
       if (params.sortBy === 'revenue') enriched.sort((a, b) => b.totalRevenue - a.totalRevenue);
 
       return text(enriched);
-    }
+    },
   );
 
   // ── ANALYTICS ─────────────────────────────────────────────────────────────
@@ -202,7 +243,7 @@ function createServer() {
   server.registerTool(
     'get_analytics',
     {
-      description: 'Аналитика магазина: revenue, кол-во заказов, топ продукты, repeat rate',
+      description: `Аналитика ${storeLabel}: revenue, кол-во заказов, топ ${productLabel}, repeat rate`,
       inputSchema: {
         period: z.enum(['today', 'week', 'month', 'all']).optional().describe('Временной период (default: month)'),
       },
@@ -220,8 +261,6 @@ function createServer() {
         }
       })();
 
-      const store = await db.store.findUniqueOrThrow({ where: { slug: STORE_SLUG } });
-
       const orders = await db.order.findMany({
         where: { storeId: store.id, ...dateFilter },
         include: { items: { include: { product: true } } },
@@ -229,7 +268,6 @@ function createServer() {
 
       const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
 
-      // Top products by revenue
       const productMap = new Map<string, { nameKey: string; qty: number; revenue: number }>();
       for (const o of orders) {
         for (const item of o.items) {
@@ -241,7 +279,6 @@ function createServer() {
       }
       const topProducts = [...productMap.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
 
-      // Repeat rate
       const customerOrderCounts = new Map<string, number>();
       for (const o of orders) {
         if (o.customerId) customerOrderCounts.set(o.customerId, (customerOrderCounts.get(o.customerId) ?? 0) + 1);
@@ -267,7 +304,7 @@ function createServer() {
           CANCELLED:  orders.filter((o) => o.status === 'CANCELLED').length,
         },
       });
-    }
+    },
   );
 
   // ── PROMOTIONS ────────────────────────────────────────────────────────────
@@ -287,8 +324,6 @@ function createServer() {
       },
     },
     async (params) => {
-      const store = await db.store.findUniqueOrThrow({ where: { slug: STORE_SLUG } });
-
       const promo = await db.promotion.create({
         data: {
           type: params.type as PromoType,
@@ -306,7 +341,7 @@ function createServer() {
 
       revalidatePath('/', 'layout');
       return text(`Акция создана: "${promo.title}" (${promo.type}, id: ${promo.id})`);
-    }
+    },
   );
 
   // ── BULK PRICES ───────────────────────────────────────────────────────────
@@ -314,19 +349,22 @@ function createServer() {
   server.registerTool(
     'bulk_update_prices',
     {
-      description: 'Bulk update prices for multiple products by percentage. Positive percent = increase, negative = decrease.',
+      description: 'Массовое обновление цен. Положительный percent = повышение, отрицательный = снижение.',
       inputSchema: {
-        brand:    z.string().optional().describe('Filter by brand (e.g. "Makita", "Bosch")'),
-        category: z.string().optional().describe('Filter by category slug'),
-        percent:  z.number().describe('Price change in percent. +10 = increase 10%, -5 = decrease 5%'),
+        ...(brands.length > 0
+          ? { brand: z.string().optional().describe(`Фильтр по бренду (${brandDesc})`) }
+          : {}),
+        category: z.string().optional().describe(`Фильтр по категории (${categorySlugs})`),
+        percent: z.number().describe('Изменение цены в процентах. +10 = повышение 10%, -5 = снижение 5%'),
       },
     },
     async (params) => {
-      const store = await db.store.findUniqueOrThrow({ where: { slug: STORE_SLUG } });
+      const brand = (params as Record<string, unknown>).brand as string | undefined;
+
       const products = await db.product.findMany({
         where: {
           storeId: store.id,
-          ...(params.brand    ? { brand: { equals: params.brand, mode: 'insensitive' } } : {}),
+          ...(brand ? { brand: { equals: brand, mode: 'insensitive' } } : {}),
           ...(params.category ? { category: { slug: params.category } } : {}),
         },
       });
@@ -348,7 +386,7 @@ function createServer() {
       const direction = params.percent > 0 ? 'increased' : 'decreased';
       revalidatePath('/', 'layout');
       return text({ message: `${results.length} products ${direction} by ${Math.abs(params.percent)}%`, products: results });
-    }
+    },
   );
 
   // ── THEME ─────────────────────────────────────────────────────────────────
@@ -360,19 +398,19 @@ function createServer() {
       inputSchema: {},
     },
     async () => {
-      const store = await db.store.findUnique({
+      const storeTheme = await db.store.findUnique({
         where: { slug: STORE_SLUG },
         select: { themeConfig: true },
       });
 
-      const dbTheme = store?.themeConfig as Partial<ThemeConfig> | null;
+      const dbTheme = storeTheme?.themeConfig as Partial<ThemeConfig> | null;
       const theme: ThemeConfig = {
         colors: { ...DEFAULT_THEME.colors, ...(dbTheme?.colors ?? {}) },
         layout: { ...DEFAULT_THEME.layout, ...(dbTheme?.layout ?? {}) },
       };
 
       return text(theme);
-    }
+    },
   );
 
   server.registerTool(
@@ -397,12 +435,12 @@ function createServer() {
       },
     },
     async (params) => {
-      const store = await db.store.findUniqueOrThrow({
+      const storeForTheme = await db.store.findUniqueOrThrow({
         where: { slug: STORE_SLUG },
         select: { id: true, themeConfig: true },
       });
 
-      const currentTheme = store.themeConfig as Partial<ThemeConfig> | null;
+      const currentTheme = storeForTheme.themeConfig as Partial<ThemeConfig> | null;
 
       const colorKeys = ['primary', 'primaryDark', 'primaryLight', 'text', 'textSecondary', 'textMuted', 'border', 'bgSubtle', 'success', 'error'] as const;
       const layoutKeys = ['heroType', 'cardStyle', 'navPosition', 'borderRadius'] as const;
@@ -423,14 +461,14 @@ function createServer() {
       };
 
       await db.store.update({
-        where: { id: store.id },
+        where: { id: storeForTheme.id },
         data: { themeConfig: updatedTheme as object },
       });
 
       const changedFields = [...Object.keys(newColors), ...Object.keys(newLayout)];
       revalidatePath('/', 'layout');
       return text({ message: `Theme updated: ${changedFields.join(', ')}`, theme: updatedTheme });
-    }
+    },
   );
 
   // ── KNOWLEDGE BASE ────────────────────────────────────────────────────────
@@ -438,10 +476,10 @@ function createServer() {
   server.registerTool(
     'search_knowledge',
     {
-      description: 'Поиск по базе знаний: доставка, гарантія, повернення, оплата, FAQ',
+      description: `Поиск по базе знаний ${storeLabel}: ${isRestaurant ? 'меню, аллергены, резервации, часы работы, FAQ' : 'доставка, гарантія, повернення, оплата, FAQ'}`,
       inputSchema: {
-        query:    z.string().describe('Поисковый запрос на любом языке'),
-        category: z.string().optional().describe('Категория: delivery, warranty, returns, payment, faq'),
+        query: z.string().describe('Поисковый запрос на любом языке'),
+        category: z.string().optional().describe(`Категория: ${isRestaurant ? 'delivery, faq, allergens, reservations' : 'delivery, warranty, returns, payment, faq'}`),
       },
     },
     async (params) => {
@@ -461,7 +499,7 @@ function createServer() {
           ? entries
           : `Ничего не найдено по запросу: "${params.query}"`,
       );
-    }
+    },
   );
 
   // ── STORE CONFIG ──────────────────────────────────────────────────────────
@@ -473,14 +511,68 @@ function createServer() {
       inputSchema: {},
     },
     async () => {
-      const store = await db.store.findUniqueOrThrow({
-        where: { slug: STORE_SLUG },
-        select: { id: true, name: true, slug: true, vertical: true, themeConfig: true },
-      });
       const verticalConfig = getVerticalConfig(store.vertical);
       return text({ store: { id: store.id, name: store.name, slug: store.slug, vertical: store.vertical }, config: verticalConfig });
-    }
+    },
   );
+
+  // ── RESTAURANT-SPECIFIC TOOLS ─────────────────────────────────────────────
+
+  if (isRestaurant) {
+    server.registerTool(
+      'get_reservations',
+      {
+        description: 'Получить бронирования ресторана с фильтрами по дате и статусу',
+        inputSchema: {
+          date: z.string().optional().describe('Дата в формате YYYY-MM-DD (default: сегодня)'),
+          status: z.enum(['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW']).optional(),
+          limit: z.number().optional().describe('Количество (default: 20)'),
+        },
+      },
+      async (params) => {
+        const limit = params.limit ?? 20;
+        const dateStr = params.date ?? new Date().toISOString().slice(0, 10);
+        const dayStart = new Date(`${dateStr}T00:00:00`);
+        const dayEnd = new Date(`${dateStr}T23:59:59`);
+
+        const reservations = await db.reservation.findMany({
+          where: {
+            storeId: store.id,
+            ...(params.date ? { date: { gte: dayStart, lte: dayEnd } } : {}),
+            ...(params.status ? { status: params.status } : {}),
+          },
+          include: { table: true },
+          orderBy: { date: 'asc' },
+          take: limit,
+        });
+
+        return text(reservations);
+      },
+    );
+
+    server.registerTool(
+      'get_tables',
+      {
+        description: 'Список столів ресторану з зонами та кількістю місць',
+        inputSchema: {
+          zone: z.string().optional().describe('Фільтр по зоні: terrace, main, private'),
+          activeOnly: z.boolean().optional().describe('Тільки активні столи (default: true)'),
+        },
+      },
+      async (params) => {
+        const tables = await db.restaurantTable.findMany({
+          where: {
+            storeId: store.id,
+            ...(params.zone ? { zone: params.zone } : {}),
+            ...(params.activeOnly !== false ? { active: true } : {}),
+          },
+          orderBy: { number: 'asc' },
+        });
+
+        return text(tables);
+      },
+    );
+  }
 
   return server;
 }
@@ -489,43 +581,41 @@ function createServer() {
 
 function buildTransport() {
   return new WebStandardStreamableHTTPServerTransport({
-    sessionIdGenerator: undefined, // stateless — no session tracking
+    sessionIdGenerator: undefined,
   });
 }
 
-// POST — MCP JSON-RPC requests (tool calls, list tools, etc.)
 export async function POST(req: Request) {
-  const server = createServer();
+  const server = await createServer();
   const transport = buildTransport();
   await server.connect(transport);
   return transport.handleRequest(req);
 }
 
-// GET — browser: info JSON; MCP client: SSE stream
 export async function GET(req: Request) {
   const accept = req.headers.get('accept') ?? '';
 
-  // Browser / health-check request — return human-readable info
   if (!accept.includes('text/event-stream')) {
+    const storeInfo = await db.store.findUnique({
+      where: { slug: STORE_SLUG },
+      select: { name: true, slug: true, vertical: true },
+    });
+
     return Response.json({
       name: 'emarket-mcp',
       version: '1.0.0',
       status: 'ok',
+      store: storeInfo,
       transport: 'Streamable HTTP (MCP 2025)',
       endpoint: '/api/mcp',
       tools: [
-        'get_products',
-        'update_product_price',
-        'get_orders',
-        'update_order_status',
-        'get_customers',
-        'get_analytics',
-        'create_promotion',
-        'bulk_update_prices',
-        'get_theme',
-        'update_theme',
-        'search_knowledge',
-        'get_store_config',
+        'get_products', 'update_product_price',
+        'get_orders', 'update_order_status',
+        'get_customers', 'get_analytics',
+        'create_promotion', 'bulk_update_prices',
+        'get_theme', 'update_theme',
+        'search_knowledge', 'get_store_config',
+        ...(storeInfo?.vertical === 'RESTAURANT' ? ['get_reservations', 'get_tables'] : []),
       ],
       claudeDesktopConfig: {
         mcpServers: {
@@ -538,14 +628,12 @@ export async function GET(req: Request) {
     });
   }
 
-  // MCP client SSE request
-  const server = createServer();
+  const server = await createServer();
   const transport = buildTransport();
   await server.connect(transport);
   return transport.handleRequest(req);
 }
 
-// DELETE — session cleanup (stateless: always 200)
 export async function DELETE() {
   return new Response(null, { status: 200 });
 }
