@@ -45,7 +45,8 @@ export default function GalleryPage() {
       for (const file of Array.from(files)) {
         const formData = new FormData();
         formData.append('file', file);
-        const uploadRes = await fetch('/api/admin/gallery/upload', {
+        formData.append('purpose', 'gallery');
+        const uploadRes = await fetch('/api/admin/upload', {
           method: 'POST',
           body: formData,
         });
@@ -126,7 +127,7 @@ export default function GalleryPage() {
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
             multiple
             className={styles.fileInput}
             onChange={handleUpload}
@@ -159,7 +160,7 @@ export default function GalleryPage() {
       </div>
 
       <p className={styles.hint}>
-        Фото відображаються на головній сторінці у секції «Галерея». Рекомендований розмір: 800×600px.
+        Фото автоматично оптимізуються (WebP, макс. 1200×800). Підтримувані формати: JPEG, PNG, WebP, GIF, AVIF. Макс. 10MB.
       </p>
 
       {loading ? (

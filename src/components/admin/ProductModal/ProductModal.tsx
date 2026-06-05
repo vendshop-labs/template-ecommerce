@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { Vertical } from '@prisma/client';
 import styles from './ProductModal.module.css';
 
@@ -11,6 +11,7 @@ export interface ProductFormData {
   price: string;
   oldPrice: string;
   inStock: boolean;
+  image?: string;
   dietaryTags?: string[];
   allergens?: string;
   portion?: string;
@@ -52,9 +53,36 @@ export default function ProductModal({ mode, initial, categories, vertical, onSa
   const [allergens, setAllergens] = useState(initial.allergens ?? '');
   const [portion, setPortion] = useState(initial.portion ?? '');
   const [prepTime, setPrepTime] = useState(initial.prepTime ?? 0);
+  const [imageUrl, setImageUrl] = useState(initial.image ?? '');
+  const [imageUploading, setImageUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('purpose', 'product');
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const err = await res.json() as { error?: string };
+        alert(err.error ?? 'Помилка завантаження');
+        return;
+      }
+      const uploadData = await res.json() as { url: string };
+      setImageUrl(uploadData.url);
+    } catch {
+      alert('Помилка завантаження');
+    } finally {
+      setImageUploading(false);
+      if (imageInputRef.current) imageInputRef.current.value = '';
+    }
+  };
 
   const toggleDietaryTag = (tag: string) =>
     setDietaryTags((prev) =>
@@ -67,6 +95,7 @@ export default function ProductModal({ mode, initial, categories, vertical, onSa
     e.preventDefault();
     onSave({
       ...data,
+      image: imageUrl || undefined,
       ...(isRestaurant && { dietaryTags, allergens, portion, prepTime }),
     });
   };
@@ -86,6 +115,26 @@ export default function ProductModal({ mode, initial, categories, vertical, onSa
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.imageUpload}>
+            {imageUrl && (
+              <div className={styles.imagePreview}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imageUrl} alt="Preview" className={styles.previewImg} />
+              </div>
+            )}
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+              className={styles.fileInput}
+              onChange={handleImageUpload}
+              id="product-image-upload"
+            />
+            <label htmlFor="product-image-upload" className={styles.uploadLabel}>
+              {imageUploading ? 'Завантажую...' : (imageUrl ? 'Змінити фото' : 'Завантажити фото')}
+            </label>
+          </div>
+
           <label className={styles.field}>
             <span className={styles.label}>Назва</span>
             <input
