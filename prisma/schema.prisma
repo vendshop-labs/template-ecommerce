@@ -16,6 +16,7 @@ model Store {
   regionBundle String   @default("UA")
 
   themeConfig Json?
+  metadata    Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

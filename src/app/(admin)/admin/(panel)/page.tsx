@@ -1,197 +1,123 @@
-import type { ReactNode } from 'react';
-import styles from './dashboard.module.css';
+import { db } from '@/lib/db';
+import DashboardClient from './DashboardClient';
 
-const ico = {
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.8,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-};
+const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
-/* ── Stat cards ─────────────────────────────────────── */
-interface Stat {
-  label: string;
-  value: string;
-  trend: string;
-  up: boolean;
-  tone: 'orange' | 'blue' | 'amber' | 'green';
-  icon: ReactNode;
-}
+export default async function AdminDashboardPage() {
+  const store = await db.store.findUnique({
+    where: { slug: STORE_SLUG },
+    select: { id: true, vertical: true },
+  });
 
-const STATS: Stat[] = [
-  {
-    label: 'Товарів',
-    value: '87',
-    trend: '+5',
-    up: true,
-    tone: 'orange',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" {...ico}>
-        <path d="M21 8 12 3 3 8v8l9 5 9-5V8Z" />
-        <path d="m3 8 9 5 9-5M12 13v8" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Замовлень',
-    value: '23',
-    trend: '+8%',
-    up: true,
-    tone: 'blue',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" {...ico}>
-        <circle cx="9" cy="20" r="1.5" />
-        <circle cx="18" cy="20" r="1.5" />
-        <path d="M2.5 3h2.2l2.2 12.2a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.5-1.2L21.5 7H6" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Відгуків',
-    value: '156',
-    trend: '+23',
-    up: true,
-    tone: 'amber',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" {...ico}>
-        <path d="M12 3.5l2.6 5.3 5.9.85-4.25 4.15 1 5.85L12 17l-5.25 2.75 1-5.85L3.5 9.65l5.9-.85L12 3.5Z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Виручка',
-    value: '45 230 грн',
-    trend: '-3%',
-    up: false,
-    tone: 'green',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" {...ico}>
-        <rect x="2.5" y="6" width="19" height="12" rx="2" />
-        <circle cx="12" cy="12" r="2.5" />
-      </svg>
-    ),
-  },
-];
+  if (!store) {
+    return <div style={{ padding: 32 }}>Store not found</div>;
+  }
 
-/* ── Recent orders ──────────────────────────────────── */
-type OrderStatus = 'new' | 'processing' | 'shipped' | 'delivered';
+  const isRestaurant = store.vertical === 'RESTAURANT';
 
-const STATUS_LABEL: Record<OrderStatus, string> = {
-  new: 'Новий',
-  processing: 'Обробляється',
-  shipped: 'Відправлено',
-  delivered: 'Доставлено',
-};
+  // Shared queries
+  const [productCount, orderCount] = await Promise.all([
+    db.product.count({ where: { storeId: store.id } }),
+    db.order.count({ where: { storeId: store.id } }),
+  ]);
 
-interface Order {
-  id: string;
-  customer: string;
-  items: number;
-  total: string;
-  status: OrderStatus;
-  date: string;
-}
+  // Restaurant-specific queries
+  let todayReservations = 0;
+  let pendingReservations = 0;
+  let weekReservations = 0;
+  let recentReservations: Array<{
+    id: string;
+    name: string;
+    guests: number;
+    time: string;
+    status: string;
+    date: Date;
+  }> = [];
 
-const ORDERS: Order[] = [
-  { id: '1042', customer: 'Іван Петренко', items: 3, total: '8 940 грн', status: 'new', date: '31.05.2026' },
-  { id: '1041', customer: 'Олена Коваль', items: 1, total: '5 749 грн', status: 'processing', date: '31.05.2026' },
-  { id: '1040', customer: 'Андрій Шевченко', items: 2, total: '6 489 грн', status: 'shipped', date: '30.05.2026' },
-  { id: '1039', customer: 'Марія Бондар', items: 5, total: '14 200 грн', status: 'delivered', date: '30.05.2026' },
-  { id: '1038', customer: 'Сергій Ткаченко', items: 1, total: '2 990 грн', status: 'delivered', date: '29.05.2026' },
-];
+  if (isRestaurant) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
 
-/* ── Top products ───────────────────────────────────── */
-interface TopProduct {
-  name: string;
-  sales: number;
-  image: string;
-}
+    [todayReservations, pendingReservations, weekReservations, recentReservations] =
+      await Promise.all([
+        db.reservation.count({
+          where: { storeId: store.id, date: { gte: today, lt: tomorrow } },
+        }),
+        db.reservation.count({
+          where: { storeId: store.id, status: 'PENDING' },
+        }),
+        db.reservation.count({
+          where: { storeId: store.id, date: { gte: weekAgo } },
+        }),
+        db.reservation.findMany({
+          where: { storeId: store.id, date: { gte: today } },
+          orderBy: [{ date: 'asc' }, { time: 'asc' }],
+          take: 5,
+          select: { id: true, name: true, guests: true, time: true, status: true, date: true },
+        }),
+      ]);
+  }
 
-const TOP_PRODUCTS: TopProduct[] = [
-  { name: 'Дриль-шурупокрут Makita DF333DSAE', sales: 48, image: '/placeholder-product.svg' },
-  { name: 'Перфоратор Bosch GBH 2-26 DRE', sales: 41, image: '/placeholder-product.svg' },
-  { name: 'Кутова шліфмашина DeWalt DWE4157', sales: 37, image: '/placeholder-product.svg' },
-  { name: 'Лобзик Metabo STEB 65 Quick', sales: 29, image: '/placeholder-product.svg' },
-  { name: 'Гайковерт Milwaukee M18 FIW2F12', sales: 24, image: '/placeholder-product.svg' },
-];
+  // Ecommerce-specific: recent orders
+  const recentOrders = !isRestaurant
+    ? await db.order.findMany({
+        where: { storeId: store.id },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          guestName: true,
+          guestEmail: true,
+          total: true,
+          status: true,
+          createdAt: true,
+        },
+      })
+    : [];
 
-export default function AdminDashboardPage() {
+  // Top products (both verticals)
+  const topProducts = await db.product.findMany({
+    where: { storeId: store.id, isHit: true },
+    orderBy: { reviewCount: 'desc' },
+    take: 5,
+    select: { id: true, nameKey: true, image: true, reviewCount: true },
+  });
+
   return (
-    <div className={styles.page}>
-      <h1 className={styles.h1}>Дашборд</h1>
-
-      {/* Stat cards */}
-      <div className={styles.stats}>
-        {STATS.map((s) => (
-          <div key={s.label} className={styles.statCard}>
-            <span className={`${styles.statIcon} ${styles[s.tone]}`}>{s.icon}</span>
-            <div className={styles.statBody}>
-              <span className={styles.statValue}>{s.value}</span>
-              <span className={styles.statLabel}>{s.label}</span>
-            </div>
-            <span className={`${styles.trend} ${s.up ? styles.trendUp : styles.trendDown}`}>
-              {s.trend}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Middle row */}
-      <div className={styles.row}>
-        {/* Recent orders */}
-        <section className={styles.panel}>
-          <h2 className={styles.panelTitle}>Останні замовлення</h2>
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>№</th>
-                  <th>Покупець</th>
-                  <th>Товари</th>
-                  <th>Сума</th>
-                  <th>Статус</th>
-                  <th>Дата</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ORDERS.map((o) => (
-                  <tr key={o.id}>
-                    <td className={styles.orderId}>#{o.id}</td>
-                    <td>{o.customer}</td>
-                    <td>{o.items}</td>
-                    <td className={styles.sum}>{o.total}</td>
-                    <td>
-                      <span className={`${styles.badge} ${styles[o.status]}`}>
-                        {STATUS_LABEL[o.status]}
-                      </span>
-                    </td>
-                    <td className={styles.date}>{o.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* Top products */}
-        <section className={styles.panel}>
-          <h2 className={styles.panelTitle}>Топ товари</h2>
-          <ul className={styles.top}>
-            {TOP_PRODUCTS.map((p, i) => (
-              <li key={p.name} className={styles.topItem}>
-                <span className={styles.topRank}>{i + 1}</span>
-                <span className={styles.topImg}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.image} alt="" />
-                </span>
-                <span className={styles.topName}>{p.name}</span>
-                <span className={styles.topSales}>{p.sales} продажів</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </div>
+    <DashboardClient
+      vertical={store.vertical}
+      stats={{
+        products: productCount,
+        orders: orderCount,
+        reviews: 0,
+        todayReservations,
+        pendingReservations,
+        weekReservations,
+      }}
+      recentOrders={recentOrders.map((o) => ({
+        id: o.id,
+        customer: o.guestName ?? o.guestEmail ?? '—',
+        total: `${o.total} €`,
+        status: o.status,
+        date: o.createdAt.toLocaleDateString('uk-UA'),
+      }))}
+      recentReservations={recentReservations.map((r) => ({
+        id: r.id,
+        name: r.name,
+        guests: r.guests,
+        time: r.time,
+        status: r.status,
+        date: r.date.toLocaleDateString('uk-UA'),
+      }))}
+      topProducts={topProducts.map((p) => ({
+        name: p.nameKey,
+        sales: p.reviewCount,
+        image: p.image ?? '/placeholder-product.svg',
+      }))}
+    />
   );
 }
