@@ -46,12 +46,12 @@ async function main() {
 
   // ============ CATEGORIES ============
   const categoryData = [
-    { slug: 'antipasti', nameKey: 'antipasti', sortOrder: 1 },
-    { slug: 'primi',     nameKey: 'primi',     sortOrder: 2 },
-    { slug: 'secondi',   nameKey: 'secondi',   sortOrder: 3 },
-    { slug: 'pizza',     nameKey: 'pizza',     sortOrder: 4 },
-    { slug: 'dolci',     nameKey: 'dolci',     sortOrder: 5 },
-    { slug: 'bevande',   nameKey: 'bevande',   sortOrder: 6 },
+    { slug: 'antipasti', nameKey: 'Antipasti',     sortOrder: 1 },
+    { slug: 'primi',     nameKey: 'Primi Piatti',  sortOrder: 2 },
+    { slug: 'secondi',   nameKey: 'Secondi Piatti',sortOrder: 3 },
+    { slug: 'pizza',     nameKey: 'Pizza',          sortOrder: 4 },
+    { slug: 'dolci',     nameKey: 'Dolci',          sortOrder: 5 },
+    { slug: 'bevande',   nameKey: 'Bevande',        sortOrder: 6 },
   ];
 
   const categories: Record<string, string> = {};
@@ -70,7 +70,7 @@ async function main() {
     // --- Antipasti ---
     {
       slug: 'bruschetta-classica',
-      nameKey: 'bruschettaClassica',
+      nameKey: 'Bruschetta Classica',
       categorySlug: 'antipasti',
       price: 7.9,
       rating: 4.5,
@@ -81,7 +81,7 @@ async function main() {
     },
     {
       slug: 'carpaccio-di-manzo',
-      nameKey: 'carpaccioManzo',
+      nameKey: 'Carpaccio di Manzo',
       categorySlug: 'antipasti',
       price: 14.5,
       rating: 5,
@@ -92,7 +92,7 @@ async function main() {
     },
     {
       slug: 'caprese-salad',
-      nameKey: 'capreseSalad',
+      nameKey: 'Insalata Caprese',
       categorySlug: 'antipasti',
       price: 9.5,
       rating: 4.5,
@@ -104,7 +104,7 @@ async function main() {
     // --- Primi ---
     {
       slug: 'spaghetti-carbonara',
-      nameKey: 'spaghettiCarbonara',
+      nameKey: 'Spaghetti alla Carbonara',
       categorySlug: 'primi',
       price: 14.9,
       rating: 5,
@@ -115,7 +115,7 @@ async function main() {
     },
     {
       slug: 'penne-arrabiata',
-      nameKey: 'penneArrabiata',
+      nameKey: "Penne all'Arrabbiata",
       categorySlug: 'primi',
       price: 12.5,
       rating: 4.5,
@@ -126,7 +126,7 @@ async function main() {
     },
     {
       slug: 'risotto-funghi',
-      nameKey: 'risottoFunghi',
+      nameKey: 'Risotto ai Funghi Porcini',
       categorySlug: 'primi',
       price: 15.9,
       rating: 5,
@@ -137,7 +137,7 @@ async function main() {
     },
     {
       slug: 'lasagna-bolognese',
-      nameKey: 'lasagnaBolognese',
+      nameKey: 'Lasagna alla Bolognese',
       categorySlug: 'primi',
       price: 13.9,
       rating: 4.5,
@@ -149,7 +149,7 @@ async function main() {
     // --- Secondi ---
     {
       slug: 'osso-buco',
-      nameKey: 'ossoBuco',
+      nameKey: 'Ossobuco alla Milanese',
       categorySlug: 'secondi',
       price: 24.5,
       rating: 5,
@@ -160,7 +160,7 @@ async function main() {
     },
     {
       slug: 'saltimbocca-romana',
-      nameKey: 'saltimboccaRomana',
+      nameKey: 'Saltimbocca alla Romana',
       categorySlug: 'secondi',
       price: 19.5,
       rating: 4.5,
@@ -170,7 +170,7 @@ async function main() {
     },
     {
       slug: 'grilled-sea-bass',
-      nameKey: 'grilledSeaBass',
+      nameKey: 'Branzino alla Griglia',
       categorySlug: 'secondi',
       price: 22.9,
       rating: 5,
@@ -183,7 +183,7 @@ async function main() {
     // --- Pizza ---
     {
       slug: 'margherita',
-      nameKey: 'margherita',
+      nameKey: 'Pizza Margherita',
       categorySlug: 'pizza',
       price: 11.9,
       rating: 4.5,
@@ -194,7 +194,7 @@ async function main() {
     },
     {
       slug: 'quattro-formaggi',
-      nameKey: 'quattroFormaggi',
+      nameKey: 'Pizza Quattro Formaggi',
       categorySlug: 'pizza',
       price: 14.9,
       rating: 5,
@@ -204,7 +204,7 @@ async function main() {
     },
     {
       slug: 'diavola',
-      nameKey: 'diavola',
+      nameKey: 'Pizza Diavola',
       categorySlug: 'pizza',
       price: 13.5,
       rating: 4.5,
@@ -214,7 +214,7 @@ async function main() {
     },
     {
       slug: 'pizza-prosciutto',
-      nameKey: 'pizzaProsciutto',
+      nameKey: 'Pizza Prosciutto e Rucola',
       categorySlug: 'pizza',
       price: 15.5,
       rating: 5,
@@ -227,7 +227,7 @@ async function main() {
     // --- Dolci ---
     {
       slug: 'tiramisu',
-      nameKey: 'tiramisu',
+      nameKey: 'Tiramisù',
       categorySlug: 'dolci',
       price: 6.9,
       rating: 5,
@@ -238,7 +238,7 @@ async function main() {
     },
     {
       slug: 'panna-cotta',
-      nameKey: 'pannaCotta',
+      nameKey: 'Panna Cotta',
       categorySlug: 'dolci',
       price: 5.9,
       rating: 4.5,
@@ -250,7 +250,7 @@ async function main() {
     // --- Bevande ---
     {
       slug: 'espresso',
-      nameKey: 'espresso',
+      nameKey: 'Espresso',
       categorySlug: 'bevande',
       price: 2.5,
       rating: 5,
@@ -260,7 +260,7 @@ async function main() {
     },
     {
       slug: 'chianti-glass',
-      nameKey: 'chiantiGlass',
+      nameKey: 'Chianti (bicchiere)',
       categorySlug: 'bevande',
       price: 7.5,
       rating: 4.5,
@@ -271,7 +271,7 @@ async function main() {
     },
     {
       slug: 'limonata',
-      nameKey: 'limonata',
+      nameKey: 'Limonata Fatta in Casa',
       categorySlug: 'bevande',
       price: 4.5,
       rating: 4.5,
