@@ -67,7 +67,7 @@ export default function TablesPage() {
   const fetchTables = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/tables?admin=true');
+      const res = await fetch('/api/admin/tables');
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json() as { tables?: RestaurantTable[] };
       setTables(data.tables ?? []);
@@ -112,7 +112,7 @@ export default function TablesPage() {
     try {
       const method = editingId ? 'PATCH' : 'POST';
       const body = editingId ? { id: editingId, ...form } : form;
-      const res = await fetch('/api/tables', {
+      const res = await fetch('/api/admin/tables', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -132,7 +132,7 @@ export default function TablesPage() {
 
   const toggleActive = async (table: RestaurantTable) => {
     try {
-      const res = await fetch('/api/tables', {
+      const res = await fetch('/api/admin/tables', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: table.id, active: !table.active }),
@@ -148,12 +148,11 @@ export default function TablesPage() {
     if (!confirm('Видалити цей стіл? Всі пов\'язані бронювання збережуться.')) return;
     setDeletingId(id);
     try {
-      const res = await fetch('/api/tables', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      if (!res.ok) throw new Error('Delete failed');
+      const res = await fetch(`/api/admin/tables?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        throw new Error(data.error ?? 'Delete failed');
+      }
       await fetchTables();
     } catch (err) {
       console.error('Failed to delete:', err);
