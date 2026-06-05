@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import WorkingHours from '@/components/admin/WorkingHours';
 import styles from './settings.module.css';
 
-type Tab = 'store' | 'delivery' | 'payment' | 'notifications' | 'security';
-const TABS: { key: Tab; label: string }[] = [
+type Tab = 'store' | 'delivery' | 'payment' | 'notifications' | 'security' | 'schedule';
+
+const BASE_TABS: { key: Tab; label: string }[] = [
   { key: 'store', label: 'Магазин' },
   { key: 'delivery', label: 'Доставка' },
   { key: 'payment', label: 'Оплата' },
@@ -48,6 +50,19 @@ function MaskedInput({ value, onChange, placeholder }: { value: string; onChange
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>('store');
+  const [vertical, setVertical] = useState('');
+
+  useEffect(() => {
+    fetch('/api/admin/store-info')
+      .then((r) => r.json() as Promise<{ store?: { vertical: string } }>)
+      .then((data) => { if (data.store?.vertical) setVertical(data.store.vertical); })
+      .catch(() => {});
+  }, []);
+
+  const tabs = [
+    ...BASE_TABS,
+    ...(vertical === 'RESTAURANT' ? [{ key: 'schedule' as Tab, label: 'Розклад' }] : []),
+  ];
 
   // Toast
   const [toast, setToast] = useState(false);
@@ -82,7 +97,7 @@ export default function AdminSettingsPage() {
       <h1 className={styles.h1}>Налаштування</h1>
 
       <div className={styles.tabs}>
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <button key={t.key} type="button" className={`${styles.tab} ${tab === t.key ? styles.tabActive : ''}`} onClick={() => setTab(t.key)}>
             {t.label}
           </button>
@@ -247,6 +262,13 @@ export default function AdminSettingsPage() {
               <Toggle checked={security.twoFactor} onChange={(v) => sSec('twoFactor', v)} disabled />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 6 — Schedule (restaurant only) */}
+      {tab === 'schedule' && (
+        <div className={styles.card}>
+          <WorkingHours />
         </div>
       )}
 
