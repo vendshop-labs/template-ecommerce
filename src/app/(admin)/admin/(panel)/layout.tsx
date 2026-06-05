@@ -1,12 +1,21 @@
+import { db } from '@/lib/db';
 import AdminSidebar from '@/components/admin/AdminSidebar/AdminSidebar';
 import styles from './admin.module.css';
 
-// Authenticated panel shell — sidebar + content. Wraps every admin section
-// except /admin/login (which lives outside this group).
-export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
+const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
+
+export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
+  const store = await db.store.findUnique({
+    where: { slug: STORE_SLUG },
+    select: { name: true, vertical: true },
+  });
+
   return (
     <div className={styles.shell}>
-      <AdminSidebar />
+      <AdminSidebar
+        storeName={store?.name ?? 'Store'}
+        vertical={store?.vertical ?? 'ECOMMERCE'}
+      />
       <main className={styles.content}>{children}</main>
     </div>
   );

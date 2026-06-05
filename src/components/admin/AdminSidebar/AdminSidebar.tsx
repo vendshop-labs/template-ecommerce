@@ -1,13 +1,13 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import type { Vertical } from '@prisma/client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './AdminSidebar.module.css';
 
 // Admin is a standalone Ukrainian-only owner tool — strings are hardcoded by
 // design (the storefront's i18n rule does not apply here).
-const STORE_NAME = 'ElectroMarket';
 
 const ico = {
   fill: 'none',
@@ -23,7 +23,13 @@ interface NavItem {
   icon: ReactNode;
 }
 
-const NAV: NavItem[] = [
+interface AdminSidebarProps {
+  storeName: string;
+  vertical: Vertical;
+}
+
+// ── Shared top ────────────────────────────────────────────────────────────
+const NAV_SHARED_TOP: NavItem[] = [
   {
     href: '/admin',
     label: 'Дашборд',
@@ -36,6 +42,10 @@ const NAV: NavItem[] = [
       </svg>
     ),
   },
+];
+
+// ── ECOMMERCE / default ───────────────────────────────────────────────────
+const NAV_ECOMMERCE: NavItem[] = [
   {
     href: '/admin/products',
     label: 'Товари',
@@ -76,6 +86,76 @@ const NAV: NavItem[] = [
       </svg>
     ),
   },
+];
+
+// ── RESTAURANT ────────────────────────────────────────────────────────────
+const NAV_RESTAURANT: NavItem[] = [
+  {
+    href: '/admin/reservations',
+    label: 'Бронювання',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...ico}>
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" />
+        <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/products',
+    label: 'Меню (страви)',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...ico}>
+        <path d="M21 8 12 3 3 8v8l9 5 9-5V8Z" />
+        <path d="m3 8 9 5 9-5M12 13v8" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/tables',
+    label: 'Столи',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...ico}>
+        <rect x="4" y="8" width="16" height="8" rx="2" />
+        <path d="M8 8V5M16 8V5M8 16v3M16 16v3" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/gallery',
+    label: 'Галерея',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...ico}>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M21 15l-5-5L5 21" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/orders',
+    label: 'Замовлення',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...ico}>
+        <circle cx="9" cy="20" r="1.5" />
+        <circle cx="18" cy="20" r="1.5" />
+        <path d="M2.5 3h2.2l2.2 12.2a1.5 1.5 0 0 0 1.5 1.2h8.8a1.5 1.5 0 0 0 1.5-1.2L21.5 7H6" />
+      </svg>
+    ),
+  },
+  {
+    href: '/admin/reviews',
+    label: 'Відгуки',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" {...ico}>
+        <path d="M12 3.5l2.6 5.3 5.9.85-4.25 4.15 1 5.85L12 17l-5.25 2.75 1-5.85L3.5 9.65l5.9-.85L12 3.5Z" />
+      </svg>
+    ),
+  },
+];
+
+// ── Shared bottom ─────────────────────────────────────────────────────────
+const NAV_SHARED_BOTTOM: NavItem[] = [
   {
     href: '/admin/theme',
     label: 'Тема',
@@ -129,9 +209,12 @@ function LogoutIcon() {
   );
 }
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ storeName, vertical }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const verticalNav = vertical === 'RESTAURANT' ? NAV_RESTAURANT : NAV_ECOMMERCE;
+  const NAV = [...NAV_SHARED_TOP, ...verticalNav, ...NAV_SHARED_BOTTOM];
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST' });
@@ -170,7 +253,7 @@ export default function AdminSidebar() {
           <LogoutIcon />
           Вийти
         </button>
-        <span className={styles.store}>{STORE_NAME}</span>
+        <span className={styles.store}>{storeName}</span>
       </div>
     </aside>
   );
