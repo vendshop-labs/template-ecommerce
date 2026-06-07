@@ -8,6 +8,8 @@ import { db } from '@/lib/db';
 import { getBaseUrl } from '@/lib/url';
 import { routing } from '@/i18n/routing';
 import { getStoreConfig } from '@/lib/store-config';
+import JsonLd from '@/components/seo/JsonLd';
+import { buildBreadcrumbSchema } from '@/lib/breadcrumbs';
 
 export const revalidate = 60;
 
@@ -134,15 +136,24 @@ export default async function CatalogRoute({
           })),
   };
 
+  const config = await getStoreConfig();
+  const breadcrumbs = buildBreadcrumbSchema(locale, [
+    { name: config.name, url: `/${locale}` },
+    { name: 'Catalog' },
+  ]);
+
   return (
-    <CatalogPage
-      initialProducts={initialProducts}
-      initialTotal={total}
-      initialTotalPages={Math.ceil(total / PAGE_SIZE)}
-      facets={facets}
-      vertical={store.vertical}
-      initialCategory={initialCategory}
-      initialQuery={searchQuery}
-    />
+    <>
+      <JsonLd data={breadcrumbs} />
+      <CatalogPage
+        initialProducts={initialProducts}
+        initialTotal={total}
+        initialTotalPages={Math.ceil(total / PAGE_SIZE)}
+        facets={facets}
+        vertical={store.vertical}
+        initialCategory={initialCategory}
+        initialQuery={searchQuery}
+      />
+    </>
   );
 }

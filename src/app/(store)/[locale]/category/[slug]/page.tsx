@@ -7,6 +7,8 @@ import type { CategoryId } from '@/components/home/CategoriesGrid/CategoriesGrid
 import { db } from '@/lib/db';
 import { getBaseUrl } from '@/lib/url';
 import { routing } from '@/i18n/routing';
+import JsonLd from '@/components/seo/JsonLd';
+import { buildBreadcrumbSchema } from '@/lib/breadcrumbs';
 
 export const revalidate = 60;
 
@@ -83,5 +85,19 @@ export default async function CategoryRoute({
     isNew: p.isNew,
   }));
 
-  return <CategoryPage slug={slug as CategoryId} products={products} />;
+  const categoryName = t.has(category.nameKey) ? t(category.nameKey) : category.nameKey;
+  const tp = await getTranslations('product');
+
+  const breadcrumbs = buildBreadcrumbSchema(locale, [
+    { name: store.name, url: `/${locale}` },
+    { name: tp('breadcrumbCatalog'), url: `/${locale}/catalog` },
+    { name: categoryName },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={breadcrumbs} />
+      <CategoryPage slug={slug as CategoryId} products={products} />
+    </>
+  );
 }

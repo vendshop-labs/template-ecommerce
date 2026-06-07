@@ -1,6 +1,8 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import HomeClient, { type ProductData } from '@/components/home/HomeClient/HomeClient';
 import { db } from '@/lib/db';
+import JsonLd from '@/components/seo/JsonLd';
+import { getBaseUrl } from '@/lib/url';
 
 export const revalidate = 60;
 
@@ -88,6 +90,25 @@ export default async function HomePage({
   };
 
   const isRestaurant = store.vertical === 'RESTAURANT';
+  const baseUrl = getBaseUrl();
+  const storeMeta = (store.metadata ?? {}) as Record<string, unknown>;
+
+  const schemaType: Record<string, string> = {
+    ECOMMERCE: 'Store',
+    FOOD_MARKET: 'GroceryStore',
+    RESTAURANT: 'Restaurant',
+    B2B: 'Store',
+  };
+
+  const localBusinessSchema = {
+    '@context': 'https://schema.org',
+    '@type': schemaType[store.vertical] ?? 'LocalBusiness',
+    name: store.name,
+    url: `${baseUrl}/${locale}`,
+    ...(storeMeta.address ? { address: { '@type': 'PostalAddress', streetAddress: storeMeta.address as string } } : {}),
+    ...(storeMeta.phone ? { telephone: storeMeta.phone as string } : {}),
+    ...(storeMeta.email ? { email: storeMeta.email as string } : {}),
+  };
 
   // Fetch categories with product count (for MenuCategories section)
   const dbCategories = isRestaurant
@@ -128,12 +149,15 @@ export default async function HomePage({
   }));
 
   return (
-    <HomeClient
-      products={products}
-      productOfDay={productOfDay}
-      storeName={store.name}
-      menuCategories={menuCategories.length > 0 ? menuCategories : undefined}
-      dailySpecials={dailySpecials.length > 0 ? dailySpecials : undefined}
-    />
+    <>
+      <JsonLd data={localBusinessSchema} />
+      <HomeClient
+        products={products}
+        productOfDay={productOfDay}
+        storeName={store.name}
+        menuCategories={menuCategories.length > 0 ? menuCategories : undefined}
+        dailySpecials={dailySpecials.length > 0 ? dailySpecials : undefined}
+      />
+    </>
   );
 }

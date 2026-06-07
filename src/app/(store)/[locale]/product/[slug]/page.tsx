@@ -6,6 +6,8 @@ import type { ProductSpec } from '@/components/product/ProductTabs/ProductTabs';
 import { db } from '@/lib/db';
 import { getBaseUrl } from '@/lib/url';
 import { routing } from '@/i18n/routing';
+import JsonLd from '@/components/seo/JsonLd';
+import { buildBreadcrumbSchema } from '@/lib/breadcrumbs';
 
 export const revalidate = 60;
 
@@ -134,5 +136,55 @@ export default async function ProductRoute({
     vegan: meta.vegan,
   };
 
-  return <ProductPage product={resolved} vertical={store.vertical} />;
+  const baseUrl = getBaseUrl();
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name,
+    description,
+    image: meta.images?.[0] ?? product.image ?? undefined,
+    sku: isRestaurant ? undefined : (meta.sku ?? product.slug.toUpperCase()),
+    brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+    offers: {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: product.currency === 'грн' ? 'UAH' : product.currency === '€' ? 'EUR' : product.currency,
+      availability: product.inStock
+        ? 'https://schema.org/InStock'
+        : 'https://schema.org/OutOfStock',
+      url: `${baseUrl}/${locale}/product/${slug}`,
+    },
+    ...(product.rating > 0 ? {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: product.rating,
+        reviewCount: product.reviewCount || 1,
+        bestRating: 5,
+      },
+    } : {}),
+  };
+
+  const category = await db.category.findFirst({
+    where: { id: product.categoryId ?? '' },
+    select: { nameKey: true, slug: true },
+  });
+
+  const catName = category
+    ? (ts.has(category.nameKey) ? ts(category.nameKey) : category.nameKey)
+    : null;
+
+  const breadcrumbs = buildBreadcrumbSchema(locale, [
+    { name: store.name, url: `/${locale}` },
+    { name: tp('breadcrumbCatalog'), url: `/${locale}/catalog` },
+    ...(catName && category ? [{ name: catName, url: `/${locale}/category/${category.slug}` }] : []),
+    { name },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={[productSchema, breadcrumbs]} />
+      <ProductPage product={resolved} vertical={store.vertical} />
+    </>
+  );
 }

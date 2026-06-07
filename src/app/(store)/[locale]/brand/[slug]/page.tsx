@@ -7,6 +7,8 @@ import { BRANDS, isBrandSlug } from '@/data/products';
 import { db } from '@/lib/db';
 import { getBaseUrl } from '@/lib/url';
 import { routing } from '@/i18n/routing';
+import JsonLd from '@/components/seo/JsonLd';
+import { buildBreadcrumbSchema } from '@/lib/breadcrumbs';
 
 export const revalidate = 60;
 
@@ -83,5 +85,18 @@ export default async function BrandRoute({
     isNew: p.isNew,
   }));
 
-  return <BrandPage wordmark={brand.wordmark} color={brand.color} products={products} />;
+  const tp = await getTranslations('product');
+
+  const breadcrumbs = buildBreadcrumbSchema(locale, [
+    { name: store.name, url: `/${locale}` },
+    { name: tp('breadcrumbCatalog'), url: `/${locale}/catalog` },
+    { name: brand.name },
+  ]);
+
+  return (
+    <>
+      <JsonLd data={breadcrumbs} />
+      <BrandPage wordmark={brand.wordmark} color={brand.color} products={products} />
+    </>
+  );
 }
