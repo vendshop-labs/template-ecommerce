@@ -353,6 +353,19 @@
     "title": "Naše Atmosféra",
     "subtitle": "Nahlédněte do Adriano — kde každý detail vypráví příběh italské vášně"
   },
+  "heroFood": {
+    "badge": "Doručujeme po celé Evropě",
+    "title": "Čerstvé potraviny, doručené za",
+    "titleAccent": "minuty.",
+    "subtitle": "Čerstvé farmářské produkty, řemeslné zboží a denní potřeby od důvěryhodných evropských dodavatelů — přímo ke dveřím.",
+    "orderNow": "Objednat nyní",
+    "viewCatalog": "Zobrazit katalog",
+    "productCount": "1000+ produktů",
+    "deliveryTime": "Doručení od 30 min",
+    "freeFrom": "Zdarma od €15",
+    "avgDelivery": "Prům. doručení",
+    "reviews": "hodnocení"
+  },
   "deliveryZones": {
     "title": "Doručovací zóny",
     "free": "Zdarma",

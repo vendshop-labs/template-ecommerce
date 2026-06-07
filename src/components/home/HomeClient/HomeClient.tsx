@@ -110,18 +110,29 @@ export default function HomeClient({ products, productOfDay, storeName, menuCate
             return <PopularTags key={section} />;
 
           case 'hero':
-            // ECOMMERCE hero not implemented — guard prevents rendering
             if (vConfig.vertical === 'ECOMMERCE') return null;
             return (
               <HeroSection
                 key={section}
                 storeName={storeName}
                 dailySpecial={
-                  fullProducts[0]
+                  vConfig.vertical === 'RESTAURANT' && fullProducts[0]
                     ? {
                         name: fullProducts[0].name,
                         price: fullProducts[0].price,
                         currency: fullProducts[0].currency ?? '€',
+                      }
+                    : undefined
+                }
+                featuredProduct={
+                  vConfig.vertical === 'FOOD_MARKET' && fullProducts[0]
+                    ? {
+                        name: fullProducts[0].name,
+                        weight: String(fullProducts[0].metadata?.weight ?? '250g'),
+                        price: fullProducts[0].price,
+                        currency: fullProducts[0].currency ?? '€',
+                        badge: fullProducts[0].metadata?.organic ? 'ORGANIC' : undefined,
+                        image: fullProducts[0].image,
                       }
                     : undefined
                 }

@@ -353,6 +353,19 @@
     "title": "Our Atmosphere",
     "subtitle": "Step inside Adriano — where every detail tells a story of Italian passion"
   },
+  "heroFood": {
+    "badge": "Now delivering across Europe",
+    "title": "Fresh food, delivered in",
+    "titleAccent": "minutes.",
+    "subtitle": "Farm-fresh produce, artisan goods, and everyday essentials from trusted European suppliers — delivered straight to your door.",
+    "orderNow": "Order now",
+    "viewCatalog": "View catalog",
+    "productCount": "1000+ products",
+    "deliveryTime": "Delivery from 30 min",
+    "freeFrom": "Free from €15",
+    "avgDelivery": "Avg. delivery",
+    "reviews": "reviews"
+  },
   "deliveryZones": {
     "title": "Delivery Zones",
     "free": "Free",
