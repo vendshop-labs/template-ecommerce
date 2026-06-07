@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { OrderStatus, PaymentStatus, PromoType } from '@prisma/client';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
 import { getVerticalConfig } from '@/lib/verticals';
+import { THEME_PRESETS } from '@/lib/theme-presets';
 
 const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
@@ -471,6 +472,32 @@ async function createServer() {
     },
   );
 
+  // ── APPLY TEMPLATE ───────────────────────────────────────────
+
+  server.registerTool(
+    'apply_template',
+    {
+      description: `Застосувати готову тему оформлення. Доступні: ${THEME_PRESETS.map((p) => p.id).join(', ')}`,
+      inputSchema: {
+        templateId: z.enum(THEME_PRESETS.map((p) => p.id) as [string, ...string[]]).describe(
+          `ID шаблону: ${THEME_PRESETS.map((p) => `${p.id} (${p.name} — ${p.description})`).join(', ')}`,
+        ),
+      },
+    },
+    async (params) => {
+      const preset = THEME_PRESETS.find((t) => t.id === params.templateId);
+      if (!preset) return text(`Template not found: ${params.templateId}. Available: ${THEME_PRESETS.map((t) => t.id).join(', ')}`);
+
+      await db.store.update({
+        where: { slug: STORE_SLUG },
+        data: { themeConfig: preset.theme as object },
+      });
+
+      revalidatePath('/', 'layout');
+      return text(`Template "${preset.name}" applied. Colors: primary=${preset.theme.colors.primary}, layout: ${preset.theme.layout.cardStyle} cards, ${preset.theme.layout.borderRadius} radius.`);
+    },
+  );
+
   // ── KNOWLEDGE BASE ────────────────────────────────────────────────────────
 
   server.registerTool(
@@ -613,7 +640,7 @@ export async function GET(req: Request) {
         'get_orders', 'update_order_status',
         'get_customers', 'get_analytics',
         'create_promotion', 'bulk_update_prices',
-        'get_theme', 'update_theme',
+        'get_theme', 'update_theme', 'apply_template',
         'search_knowledge', 'get_store_config',
         ...(storeInfo?.vertical === 'RESTAURANT' ? ['get_reservations', 'get_tables'] : []),
       ],

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import styles from './theme.module.css';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
+import { THEME_PRESETS } from '@/lib/theme-presets';
 
 const COLOR_FIELDS: { key: keyof ThemeConfig['colors']; label: string; hint: string }[] = [
   { key: 'primary',       label: 'Primary',           hint: 'Buttons, links, accents' },
@@ -73,6 +74,30 @@ export default function ThemeEditorPage() {
       </div>
 
       {toast && <div className={styles.toast}>{toast}</div>}
+
+      <section className={styles.section} style={{ marginBottom: '24px' }}>
+        <h2 className={styles.h2}>Готові теми</h2>
+        <p className={styles.presetsHint}>Оберіть тему як основу, потім налаштуйте кольори нижче</p>
+        <div className={styles.presetsGrid}>
+          {THEME_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              className={styles.presetCard}
+              onClick={() => setTheme(preset.theme)}
+              type="button"
+            >
+              <div className={styles.presetColors}>
+                <span className={styles.presetSwatch} style={{ background: preset.theme.colors.primary }} />
+                <span className={styles.presetSwatch} style={{ background: preset.theme.colors.primaryDark }} />
+                <span className={styles.presetSwatch} style={{ background: preset.theme.colors.text }} />
+                <span className={styles.presetSwatch} style={{ background: preset.theme.colors.bgSubtle }} />
+              </div>
+              <span className={styles.presetName}>{preset.name}</span>
+              <span className={styles.presetDesc}>{preset.description}</span>
+            </button>
+          ))}
+        </div>
+      </section>
 
       <div className={styles.grid}>
         {/* Colors Section */}

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { OrderStatus, PaymentStatus, PromoType } from '@prisma/client';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
 import { getVerticalConfig } from '@/lib/verticals';
+import { THEME_PRESETS } from '@/lib/theme-presets';
 
 const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001';
@@ -222,6 +223,21 @@ function buildTools(ctx: StoreContext) {
       description: 'Get store vertical config (features, delivery modes, checkout, UI)',
       input_schema: { type: 'object' as const, properties: {} },
     },
+    {
+      name: 'apply_template',
+      description: `Застосувати готову тему оформлення. Доступні: ${THEME_PRESETS.map((p) => p.id).join(', ')}`,
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          templateId: {
+            type: 'string',
+            enum: THEME_PRESETS.map((p) => p.id),
+            description: `ID шаблону: ${THEME_PRESETS.map((p) => `${p.id} (${p.name} — ${p.description})`).join(', ')}`,
+          },
+        },
+        required: ['templateId'],
+      },
+    },
   ];
 }
 
@@ -258,6 +274,7 @@ type ToolParams =
   | { name: 'create_promotion';     input: CreatePromoParams }
   | { name: 'search_knowledge';     input: SearchKnowledgeParams }
   | { name: 'bulk_update_prices';   input: BulkUpdatePricesParams }
+  | { name: 'apply_template';       input: { templateId: string } }
   | { name: string;                 input: Record<string, unknown> };
 
 function buildDateFilter(period?: string): { createdAt?: { gte: Date } } {
@@ -507,6 +524,20 @@ async function executeTool(tool: ToolParams): Promise<string> {
       });
       const verticalConfig = getVerticalConfig(storeData.vertical);
       return JSON.stringify({ store: storeData, config: verticalConfig });
+    }
+
+    case 'apply_template': {
+      const p = tool.input as { templateId: string };
+      const preset = THEME_PRESETS.find((t) => t.id === p.templateId);
+      if (!preset) return `Template not found: ${p.templateId}. Available: ${THEME_PRESETS.map((t) => t.id).join(', ')}`;
+
+      await db.store.update({
+        where: { id: store.id },
+        data: { themeConfig: preset.theme as object },
+      });
+
+      revalidatePath('/', 'layout');
+      return `Template "${preset.name}" applied successfully. Colors: primary=${preset.theme.colors.primary}, layout: ${preset.theme.layout.cardStyle} cards, ${preset.theme.layout.borderRadius} radius.`;
     }
 
     default:
