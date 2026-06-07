@@ -9,176 +9,225 @@ const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001';
 const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 
-// ─── SYSTEM prompt (shared between providers) ──────────────────────────────
-const SYSTEM = `You are an AI assistant for the ElectroMarket online store admin panel.
+// ─── Store context (dynamic per store vertical) ────────────────────────────
+interface StoreContext {
+  store: { id: string; name: string; slug: string; vertical: string };
+  categories: string[];
+  brands: string[];
+  verticalLabel: string;
+  productLabel: string;
+}
+
+async function getStoreContext(): Promise<StoreContext> {
+  const store = await db.store.findUniqueOrThrow({
+    where: { slug: STORE_SLUG },
+    select: { id: true, name: true, slug: true, vertical: true },
+  });
+  const categories = await db.category.findMany({
+    where: { storeId: store.id },
+    select: { slug: true },
+    orderBy: { sortOrder: 'asc' },
+  });
+  const brandsRaw = await db.product.findMany({
+    where: { storeId: store.id, brand: { not: null } },
+    select: { brand: true },
+    distinct: ['brand'],
+  });
+  const isRestaurant = store.vertical === 'RESTAURANT';
+  const isFoodMarket = store.vertical === 'FOOD_MARKET';
+  return {
+    store,
+    categories: categories.map((c) => c.slug),
+    brands: brandsRaw.map((b) => b.brand).filter((b): b is string => b !== null),
+    verticalLabel: isRestaurant ? 'restaurant' : isFoodMarket ? 'food market' : 'online store',
+    productLabel: isRestaurant ? 'menu item' : isFoodMarket ? 'product/food item' : 'product',
+  };
+}
+
+// ─── Dynamic SYSTEM prompt ─────────────────────────────────────────────────
+function buildSystemPrompt(ctx: StoreContext): string {
+  const verticalHints = ctx.store.vertical === 'RESTAURANT'
+    ? `\nThis is a restaurant. Products are menu items (dishes and drinks). Categories are menu sections.
+When the user asks for a "price list" or "menu", use get_products without category filter to get all items.
+When listing items, format as a menu: name, portion/description, price.`
+    : ctx.store.vertical === 'FOOD_MARKET'
+    ? `\nThis is a food/grocery market. Products are food items.`
+    : '';
+
+  return `You are an AI assistant for the "${ctx.store.name}" ${ctx.verticalLabel} admin panel.
 You have access to the store database via tools.
+Available categories: ${ctx.categories.join(', ') || 'none yet'}.${ctx.brands.length > 0 ? `\nAvailable brands: ${ctx.brands.join(', ')}.` : ''}${verticalHints}
 IMPORTANT: Detect the language of the user's message and reply in the SAME language.
 If the user writes in Russian — reply in Russian.
 If the user writes in English — reply in English.
 If the user writes in Ukrainian — reply in Ukrainian.
 Be concise, helpful, and specific. Always show actual numbers, names, and prices from the database.
 Don't explain what you're doing — just do it and present the results clearly.`;
+}
 
-// ─── Tool definitions (Anthropic format, converted for OpenAI as needed) ───
-const TOOLS = [
-  {
-    name: 'get_products',
-    description: 'Получить список продуктов магазина с фильтрами',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        category: { type: 'string', description: 'Slug категории: drills, grinders, perforators, jigsaws, sanders, lasers, measuring, accessories' },
-        brand:    { type: 'string', description: 'Бренд: Makita, Bosch, DeWalt, Milwaukee, Metabo' },
-        inStock:  { type: 'boolean' },
-        maxPrice: { type: 'number' },
-        limit:    { type: 'number', description: 'Количество (default 10)' },
+// ─── Dynamic TOOLS ─────────────────────────────────────────────────────────
+function buildTools(ctx: StoreContext) {
+  const categoryDesc = ctx.categories.length > 0
+    ? `Slug категории: ${ctx.categories.join(', ')}`
+    : 'Slug категории (получить список через get_store_config)';
+  const brandDesc = ctx.brands.length > 0
+    ? `Бренд: ${ctx.brands.join(', ')}`
+    : 'Бренд товара';
+
+  return [
+    {
+      name: 'get_products',
+      description: `Получить список ${ctx.productLabel === 'menu item' ? 'позиций меню' : 'продуктов'} с фильтрами`,
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          category: { type: 'string', description: categoryDesc },
+          ...(ctx.brands.length > 0 ? { brand: { type: 'string', description: brandDesc } } : {}),
+          inStock:  { type: 'boolean' },
+          maxPrice: { type: 'number' },
+          limit:    { type: 'number', description: 'Количество (default 10)' },
+        },
       },
     },
-  },
-  {
-    name: 'update_product_price',
-    description: 'Изменить цену продукта',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        productId: { type: 'string' },
-        newPrice:  { type: 'number' },
-        oldPrice:  { type: 'number', description: 'Старая цена для отображения скидки' },
-      },
-      required: ['productId', 'newPrice'],
-    },
-  },
-  {
-    name: 'get_orders',
-    description: 'Получить заказы с фильтрами по статусу и периоду',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        status: { type: 'string', enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] },
-        period: { type: 'string', enum: ['today', 'week', 'month', 'all'] },
-        limit:  { type: 'number' },
+    {
+      name: 'update_product_price',
+      description: `Изменить цену ${ctx.productLabel === 'menu item' ? 'позиции меню' : 'продукта'}`,
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          productId: { type: 'string' },
+          newPrice:  { type: 'number' },
+          oldPrice:  { type: 'number', description: 'Старая цена для отображения скидки' },
+        },
+        required: ['productId', 'newPrice'],
       },
     },
-  },
-  {
-    name: 'update_order_status',
-    description: 'Обновить статус заказа. Можно добавить номер отслеживания.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        orderId:        { type: 'string' },
-        status:         { type: 'string', enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'] },
-        trackingNumber: { type: 'string' },
-        internalNote:   { type: 'string' },
-      },
-      required: ['orderId', 'status'],
-    },
-  },
-  {
-    name: 'get_customers',
-    description: 'Список клиентов с количеством заказов и суммой покупок',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        sortBy: { type: 'string', enum: ['orders', 'revenue', 'recent'] },
-        limit:  { type: 'number' },
+    {
+      name: 'get_orders',
+      description: 'Получить заказы с фильтрами по статусу и периоду',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          status: { type: 'string', enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] },
+          period: { type: 'string', enum: ['today', 'week', 'month', 'all'] },
+          limit:  { type: 'number' },
+        },
       },
     },
-  },
-  {
-    name: 'get_analytics',
-    description: 'Аналитика магазина: revenue, средний чек, топ продукты',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        period: { type: 'string', enum: ['today', 'week', 'month', 'all'] },
+    {
+      name: 'update_order_status',
+      description: 'Обновить статус заказа. Можно добавить номер отслеживания.',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          orderId:        { type: 'string' },
+          status:         { type: 'string', enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'] },
+          trackingNumber: { type: 'string' },
+          internalNote:   { type: 'string' },
+        },
+        required: ['orderId', 'status'],
       },
     },
-  },
-  {
-    name: 'create_promotion',
-    description: 'Создать акцию, продукт дня, баннер или бесплатную доставку',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        type:            { type: 'string', enum: ['DISCOUNT', 'PRODUCT_OF_DAY', 'BANNER', 'FREE_DELIVERY'] },
-        title:           { type: 'string' },
-        description:     { type: 'string' },
-        discountPercent: { type: 'number' },
-        productIds:      { type: 'array', items: { type: 'string' } },
-        endsAt:          { type: 'string', description: 'ISO date string' },
-      },
-      required: ['type', 'title'],
-    },
-  },
-  {
-    name: 'search_knowledge',
-    description: 'Поиск по базе знаний: FAQ, доставка, гарантия, возврат',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        query: { type: 'string' },
-      },
-      required: ['query'],
-    },
-  },
-  {
-    name: 'bulk_update_prices',
-    description: 'Bulk update prices for multiple products by percentage. Use this when user asks to change prices for a brand, category, or all products. Positive percent = increase, negative = decrease.',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        brand:    { type: 'string', description: 'Filter by brand (e.g. "Makita", "Bosch")' },
-        category: { type: 'string', description: 'Filter by category slug' },
-        percent:  { type: 'number', description: 'Price change in percent. +10 = increase 10%, -5 = decrease 5%' },
-      },
-      required: ['percent'],
-    },
-  },
-  {
-    name: 'get_theme',
-    description: 'Get current store theme (colors and layout)',
-    input_schema: {
-      type: 'object' as const,
-      properties: {},
-    },
-  },
-  {
-    name: 'update_theme',
-    description: 'Update store theme colors and layout. Pass only the fields you want to change. Color values as hex strings (e.g. "#3b82f6").',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        primary:       { type: 'string', description: 'Main brand color hex' },
-        primaryDark:   { type: 'string', description: 'Hover/active state hex' },
-        primaryLight:  { type: 'string', description: 'Light background tint hex' },
-        text:          { type: 'string', description: 'Primary text color hex' },
-        textSecondary: { type: 'string', description: 'Secondary text hex' },
-        textMuted:     { type: 'string', description: 'Muted text hex' },
-        border:        { type: 'string', description: 'Border/divider hex' },
-        bgSubtle:      { type: 'string', description: 'Subtle background hex' },
-        success:       { type: 'string', description: 'Success state hex' },
-        error:         { type: 'string', description: 'Error state hex' },
-        heroType:      { type: 'string', enum: ['full-width', 'split', 'minimal'] },
-        cardStyle:     { type: 'string', enum: ['shadow', 'border', 'flat'] },
-        navPosition:   { type: 'string', enum: ['top', 'side'] },
-        borderRadius:  { type: 'string', enum: ['sharp', 'rounded', 'pill'] },
+    {
+      name: 'get_customers',
+      description: 'Список клиентов с количеством заказов и суммой покупок',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          sortBy: { type: 'string', enum: ['orders', 'revenue', 'recent'] },
+          limit:  { type: 'number' },
+        },
       },
     },
-  },
-  {
-    name: 'get_store_config',
-    description: 'Get store vertical config (features, delivery modes, checkout, UI)',
-    input_schema: {
-      type: 'object' as const,
-      properties: {},
+    {
+      name: 'get_analytics',
+      description: 'Аналитика магазина: revenue, средний чек, топ продукты',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          period: { type: 'string', enum: ['today', 'week', 'month', 'all'] },
+        },
+      },
     },
-  },
-] as const;
+    {
+      name: 'create_promotion',
+      description: 'Создать акцию, продукт дня, баннер или бесплатную доставку',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          type:            { type: 'string', enum: ['DISCOUNT', 'PRODUCT_OF_DAY', 'BANNER', 'FREE_DELIVERY'] },
+          title:           { type: 'string' },
+          description:     { type: 'string' },
+          discountPercent: { type: 'number' },
+          productIds:      { type: 'array', items: { type: 'string' } },
+          endsAt:          { type: 'string', description: 'ISO date string' },
+        },
+        required: ['type', 'title'],
+      },
+    },
+    {
+      name: 'search_knowledge',
+      description: 'Поиск по базе знаний: FAQ, доставка, гарантия, возврат',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          query: { type: 'string' },
+        },
+        required: ['query'],
+      },
+    },
+    {
+      name: 'bulk_update_prices',
+      description: `Bulk update prices for multiple ${ctx.productLabel}s by percentage. Positive percent = increase, negative = decrease.`,
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          ...(ctx.brands.length > 0 ? { brand: { type: 'string', description: `Filter by brand (${ctx.brands.slice(0, 5).join(', ')})` } } : {}),
+          category: { type: 'string', description: `Filter by category slug (${ctx.categories.join(', ')})` },
+          percent:  { type: 'number', description: 'Price change in percent. +10 = increase 10%, -5 = decrease 5%' },
+        },
+        required: ['percent'],
+      },
+    },
+    {
+      name: 'get_theme',
+      description: 'Get current store theme (colors and layout)',
+      input_schema: { type: 'object' as const, properties: {} },
+    },
+    {
+      name: 'update_theme',
+      description: 'Update store theme colors and layout. Pass only the fields you want to change. Color values as hex strings (e.g. "#3b82f6").',
+      input_schema: {
+        type: 'object' as const,
+        properties: {
+          primary:       { type: 'string', description: 'Main brand color hex' },
+          primaryDark:   { type: 'string', description: 'Hover/active state hex' },
+          primaryLight:  { type: 'string', description: 'Light background tint hex' },
+          text:          { type: 'string', description: 'Primary text color hex' },
+          textSecondary: { type: 'string', description: 'Secondary text hex' },
+          textMuted:     { type: 'string', description: 'Muted text hex' },
+          border:        { type: 'string', description: 'Border/divider hex' },
+          bgSubtle:      { type: 'string', description: 'Subtle background hex' },
+          success:       { type: 'string', description: 'Success state hex' },
+          error:         { type: 'string', description: 'Error state hex' },
+          heroType:      { type: 'string', enum: ['full-width', 'split', 'minimal'] },
+          cardStyle:     { type: 'string', enum: ['shadow', 'border', 'flat'] },
+          navPosition:   { type: 'string', enum: ['top', 'side'] },
+          borderRadius:  { type: 'string', enum: ['sharp', 'rounded', 'pill'] },
+        },
+      },
+    },
+    {
+      name: 'get_store_config',
+      description: 'Get store vertical config (features, delivery modes, checkout, UI)',
+      input_schema: { type: 'object' as const, properties: {} },
+    },
+  ];
+}
 
 // ─── OpenAI tool format converter ──────────────────────────────────────────
-function toOpenAITools() {
-  return TOOLS.map((t) => ({
+function toOpenAITools(tools: ReturnType<typeof buildTools>) {
+  return tools.map((t) => ({
     type: 'function' as const,
     function: {
       name: t.name,
@@ -494,10 +543,12 @@ interface OpenAIResponse {
 async function handleOpenAI(
   apiKey: string,
   message: string,
-  history?: OpenAIMessage[],
+  history: OpenAIMessage[] | undefined,
+  systemPrompt: string,
+  tools: ReturnType<typeof buildTools>,
 ): Promise<{ response: string; toolsUsed: string[] }> {
   const messages: OpenAIMessage[] = [
-    { role: 'system', content: SYSTEM },
+    { role: 'system', content: systemPrompt },
     ...(history ?? []),
     { role: 'user', content: message },
   ];
@@ -514,7 +565,7 @@ async function handleOpenAI(
       body: JSON.stringify({
         model: OPENAI_MODEL,
         messages: msgs,
-        tools: toOpenAITools(),
+        tools: toOpenAITools(tools),
         max_tokens: 1024,
       }),
     }).then((r) => r.json() as Promise<OpenAIResponse>);
@@ -560,7 +611,9 @@ interface ClaudeResponse { stop_reason: string; content: ContentBlock[] }
 async function handleAnthropic(
   apiKey: string,
   message: string,
-  history?: ClaudeMessage[],
+  history: ClaudeMessage[] | undefined,
+  systemPrompt: string,
+  tools: ReturnType<typeof buildTools>,
 ): Promise<{ response: string; toolsUsed: string[] }> {
   const messages: ClaudeMessage[] = [
     ...(history ?? []),
@@ -578,8 +631,8 @@ async function handleAnthropic(
       body: JSON.stringify({
         model: ANTHROPIC_MODEL,
         max_tokens: 1024,
-        system: SYSTEM,
-        tools: TOOLS,
+        system: systemPrompt,
+        tools,
         messages: msgs,
       }),
     }).then((r) => r.json() as Promise<ClaudeResponse>);
@@ -628,13 +681,17 @@ export async function POST(req: NextRequest) {
   };
 
   try {
+    const ctx = await getStoreContext();
+    const systemPrompt = buildSystemPrompt(ctx);
+    const tools = buildTools(ctx);
+
     if (openaiKey) {
-      const { response, toolsUsed } = await handleOpenAI(openaiKey, message, history as OpenAIMessage[]);
+      const { response, toolsUsed } = await handleOpenAI(openaiKey, message, history as OpenAIMessage[], systemPrompt, tools);
       return Response.json({ response, toolsUsed, provider: 'openai' });
     }
 
     // Fallback: Anthropic Claude
-    const { response, toolsUsed } = await handleAnthropic(anthropicKey!, message, history as ClaudeMessage[]);
+    const { response, toolsUsed } = await handleAnthropic(anthropicKey!, message, history as ClaudeMessage[], systemPrompt, tools);
     return Response.json({ response, toolsUsed, provider: 'anthropic' });
   } catch (err) {
     console.error('[admin/chat] AI error:', err);
