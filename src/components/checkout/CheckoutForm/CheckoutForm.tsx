@@ -7,7 +7,7 @@ import { useCartStore } from '@/stores/useCartStore';
 import { useVerticalConfig } from '@/lib/vertical-context';
 import styles from './CheckoutForm.module.css';
 
-type DeliveryMethod = 'branch' | 'courier' | 'pickup' | 'dine_in';
+type DeliveryMethod = 'SHIPPING' | 'COURIER' | 'PICKUP' | 'DINE_IN';
 type PaymentMethod = 'wayforpay' | 'liqpay' | 'cod' | 'installments' | 'card' | 'at_table';
 
 interface FormData {
@@ -144,7 +144,7 @@ export default function CheckoutForm() {
     lastName: '',
     phone: '',
     email: '',
-    deliveryMethod: isRestaurant ? 'dine_in' : 'branch',
+    deliveryMethod: (vConfig.delivery.modes.find(m => m.enabled)?.mode ?? 'SHIPPING') as DeliveryMethod,
     city: '',
     branch: '',
     paymentMethod: isRestaurant ? 'card' : 'wayforpay',
@@ -156,17 +156,23 @@ export default function CheckoutForm() {
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) =>
     setData((d) => ({ ...d, [key]: value }));
 
-  const deliveryCards: { value: DeliveryMethod; label: string; icon: ReactNode }[] = isRestaurant
-    ? [
-        { value: 'dine_in', label: t('dineIn'), icon: <DineInIcon /> },
-        { value: 'courier', label: t('courierDelivery'), icon: <ScooterIcon /> },
-        { value: 'pickup', label: t('takeaway'), icon: <TakeawayIcon /> },
-      ]
-    : [
-        { value: 'branch', label: t('novaPoshta'), icon: <BoxIcon /> },
-        { value: 'courier', label: t('novaPoshtaCourier'), icon: <TruckIcon /> },
-        { value: 'pickup', label: t('selfPickup'), icon: <StoreIcon /> },
-      ];
+  const isFoodVertical = vConfig.vertical === 'RESTAURANT' || vConfig.vertical === 'FOOD_MARKET';
+
+  const DELIVERY_ICON_MAP: Record<string, ReactNode> = {
+    SHIPPING: <BoxIcon />,
+    COURIER: isFoodVertical ? <ScooterIcon /> : <TruckIcon />,
+    PICKUP: isRestaurant ? <TakeawayIcon /> : <StoreIcon />,
+    DINE_IN: <DineInIcon />,
+  };
+
+  const deliveryCards: { value: DeliveryMethod; label: string; icon: ReactNode }[] =
+    vConfig.delivery.modes
+      .filter(m => m.enabled)
+      .map(m => ({
+        value: m.mode as DeliveryMethod,
+        label: m.label,
+        icon: DELIVERY_ICON_MAP[m.mode] ?? <BoxIcon />,
+      }));
 
   const paymentCards: { value: PaymentMethod; label: string; icon: ReactNode }[] = isRestaurant
     ? [
@@ -293,7 +299,7 @@ export default function CheckoutForm() {
           ))}
         </div>
 
-        {data.deliveryMethod !== 'pickup' && data.deliveryMethod !== 'dine_in' && (
+        {data.deliveryMethod !== 'PICKUP' && data.deliveryMethod !== 'DINE_IN' && (
           <div className={styles.grid2}>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="city">

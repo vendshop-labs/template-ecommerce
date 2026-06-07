@@ -24,6 +24,7 @@ export interface ProductCardProps {
   inStock: boolean;
   isHit?: boolean;
   isNew?: boolean;
+  metadata?: Record<string, unknown> | null;
   onAddToCart?: (id: string) => void;
   onCompare?: (id: string) => void;
   onFavorite?: (id: string) => void;
@@ -123,6 +124,7 @@ export default function ProductCard({
   inStock,
   isHit = false,
   isNew = false,
+  metadata,
   onAddToCart,
   onCompare,
   onFavorite,
@@ -154,6 +156,7 @@ export default function ProductCard({
   const href = `/product/${slug}`;
 
   const isRestaurant = vConfig.vertical === 'RESTAURANT';
+  const isFood = vConfig.product.cardVariant === 'food';
 
   const isPlaceholder = image === '/placeholder-product.svg';
 
@@ -205,6 +208,26 @@ export default function ProductCard({
         <h3 className={styles.name}>
           <Link href={href}>{name}</Link>
         </h3>
+
+        {isFood && metadata && (
+          <div className={styles.foodBadges}>
+            {metadata.temperature === 'frozen' && (
+              <span className={styles.badgeCold}>❄️ Заморожено</span>
+            )}
+            {metadata.temperature === 'refrigerated' && (
+              <span className={styles.badgeCold}>🧊 Холодильник</span>
+            )}
+            {!!metadata.organic && (
+              <span className={styles.badgeOrganic}>🌿 Organic</span>
+            )}
+            {!!metadata.expiryDays && Number(metadata.expiryDays) < 7 && (
+              <span className={styles.badgeExpiry}>⏰ {String(metadata.expiryDays)} дн.</span>
+            )}
+          </div>
+        )}
+        {isFood && !!metadata?.weight && (
+          <span className={styles.weight}>{String(metadata.weight)}</span>
+        )}
 
         <div className={styles.rating} aria-label={`${rating} / 5 — ${reviewCount} ${t('reviews')}`}>
           <Stars value={rating} />

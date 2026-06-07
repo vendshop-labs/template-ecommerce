@@ -100,8 +100,9 @@ export const VERTICAL_CONFIGS: Record<Vertical, VerticalConfig> = {
     },
     delivery: {
       modes: [
-        { mode: 'SHIPPING', label: 'Delivery', enabled: true, icon: '📦' },
-        { mode: 'PICKUP',   label: 'Pickup',   enabled: true, icon: '🏪' },
+        { mode: 'SHIPPING', label: 'Nova Poshta', enabled: true, icon: '📦' },
+        { mode: 'COURIER',  label: 'Courier',     enabled: true, icon: '🚴' },
+        { mode: 'PICKUP',   label: 'Pickup',      enabled: true, icon: '🏪' },
       ],
       showEstimatedTime: false,
       showZonesMap: false,

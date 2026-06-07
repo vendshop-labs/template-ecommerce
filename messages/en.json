@@ -30,7 +30,15 @@
     "secondi": "Main Courses",
     "pizza": "Pizza",
     "dolci": "Desserts",
-    "bevande": "Drinks"
+    "bevande": "Drinks",
+    "fruits": "Fruits",
+    "vegetables": "Vegetables",
+    "dairy": "Dairy",
+    "meat": "Meat",
+    "bakery": "Bakery",
+    "drinks": "Drinks",
+    "frozen": "Frozen",
+    "grocery": "Grocery"
   },
   "product": {
     "addToCart": "Add to cart",
@@ -344,6 +352,15 @@
     "label": "Gallery",
     "title": "Our Atmosphere",
     "subtitle": "Step inside Adriano — where every detail tells a story of Italian passion"
+  },
+  "deliveryZones": {
+    "title": "Delivery Zones",
+    "free": "Free",
+    "from": "from",
+    "freeFrom": "Free delivery on orders over {amount} {currency}",
+    "minOrder": "Min. order",
+    "delivery": "Delivery",
+    "minutes": "min"
   },
   "About": {
     "label": "Our Story",

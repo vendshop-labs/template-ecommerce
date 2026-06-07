@@ -21,7 +21,7 @@ export default async function HomePage({
   // Fetch bestsellers and product-of-day from DB
   const store = await db.store.findUniqueOrThrow({ where: { slug: STORE_SLUG } });
 
-  const [hitProducts, podPromotion] = await Promise.all([
+  const [hitProducts, podPromotion, dbZones] = await Promise.all([
     db.product.findMany({
       where: { storeId: store.id, isHit: true, inStock: true },
       orderBy: { reviewCount: 'desc' },
@@ -30,7 +30,22 @@ export default async function HomePage({
     db.promotion.findFirst({
       where: { storeId: store.id, type: 'PRODUCT_OF_DAY', active: true },
     }),
+    store.vertical === 'FOOD_MARKET'
+      ? db.deliveryZone.findMany({
+          where: { storeId: store.id, active: true },
+          orderBy: { fee: 'asc' },
+        })
+      : Promise.resolve([]),
   ]);
+
+  const deliveryZones = dbZones.map((z) => ({
+    id: z.id,
+    name: z.name,
+    fee: z.fee,
+    minOrder: z.minOrder,
+    estimatedMin: z.estimatedMin,
+    estimatedMax: z.estimatedMax,
+  }));
 
   const products: ProductData[] = hitProducts.map((p) => ({
     id: p.id,
@@ -46,6 +61,7 @@ export default async function HomePage({
     inStock: p.inStock,
     isHit: p.isHit,
     isNew: p.isNew,
+    metadata: p.metadata as Record<string, unknown> | null,
   }));
 
   // Fetch product-of-day product
@@ -157,6 +173,7 @@ export default async function HomePage({
         storeName={store.name}
         menuCategories={menuCategories.length > 0 ? menuCategories : undefined}
         dailySpecials={dailySpecials.length > 0 ? dailySpecials : undefined}
+        deliveryZones={deliveryZones.length > 0 ? deliveryZones : undefined}
       />
     </>
   );

@@ -30,7 +30,15 @@
     "secondi": "Hlavní jídla",
     "pizza": "Pizza",
     "dolci": "Dezerty",
-    "bevande": "Nápoje"
+    "bevande": "Nápoje",
+    "fruits": "Ovoce",
+    "vegetables": "Zelenina",
+    "dairy": "Mléčné výrobky",
+    "meat": "Maso",
+    "bakery": "Pečivo",
+    "drinks": "Nápoje",
+    "frozen": "Mražené",
+    "grocery": "Potraviny"
   },
   "product": {
     "addToCart": "Do košíku",
@@ -344,6 +352,15 @@
     "label": "Galerie",
     "title": "Naše Atmosféra",
     "subtitle": "Nahlédněte do Adriano — kde každý detail vypráví příběh italské vášně"
+  },
+  "deliveryZones": {
+    "title": "Doručovací zóny",
+    "free": "Zdarma",
+    "from": "od",
+    "freeFrom": "Doručení zdarma při objednávce nad {amount} {currency}",
+    "minOrder": "Min. objednávka",
+    "delivery": "Doručení",
+    "minutes": "min"
   },
   "About": {
     "label": "Náš Příběh",

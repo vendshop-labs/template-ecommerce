@@ -6,6 +6,7 @@ import MenuCategories from '@/components/home/MenuCategories/MenuCategories';
 import CategoriesGrid from '@/components/home/CategoriesGrid/CategoriesGrid';
 import BestSellers from '@/components/home/BestSellers/BestSellers';
 import ProductOfDay from '@/components/home/ProductOfDay/ProductOfDay';
+import DeliveryZonesSection, { type ZoneData } from '@/components/home/DeliveryZonesSection/DeliveryZonesSection';
 
 const DailySpecials = dynamic(() => import('@/components/home/DailySpecials/DailySpecials'));
 const ReservationSection = dynamic(() => import('@/components/home/ReservationSection/ReservationSection'));
@@ -49,6 +50,7 @@ interface HomeClientProps {
   storeName: string;
   menuCategories?: MenuCategoryItem[];
   dailySpecials?: DailySpecialItem[];
+  deliveryZones?: ZoneData[];
 }
 
 // Module-level constant: countdown target is fixed for the session duration.
@@ -57,7 +59,7 @@ const ENDS_AT = new Date(Date.now() + ((2 * 24 + 14) * 3600 + 37 * 60 + 22) * 10
 const noop = (_id: string) => {};
 const noopStr = (_s: string) => {};
 
-export default function HomeClient({ products, productOfDay, storeName, menuCategories, dailySpecials }: HomeClientProps) {
+export default function HomeClient({ products, productOfDay, storeName, menuCategories, dailySpecials, deliveryZones }: HomeClientProps) {
   const vConfig = useVerticalConfig();
   const sections = vConfig.ui.homeSections;
 
@@ -161,9 +163,16 @@ export default function HomeClient({ products, productOfDay, storeName, menuCate
               </section>
             );
 
-          // Future vertical sections — not yet implemented
           case 'delivery-zones':
-            return null;
+            if (!deliveryZones?.length) return null;
+            return (
+              <DeliveryZonesSection
+                key={section}
+                zones={deliveryZones}
+                currency={vConfig.store.defaultCurrency}
+                defaultMinOrder={vConfig.delivery.defaultMinOrder}
+              />
+            );
 
           default:
             return null;
