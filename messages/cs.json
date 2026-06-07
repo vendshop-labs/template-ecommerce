@@ -108,7 +108,13 @@
     "awardWinning": "Ocenění",
     "awardWinningDesc": "nejlepší italské 2025",
     "freeBooking": "Bezplatná rezervace",
-    "freeBookingDesc": "bez zálohy"
+    "freeBookingDesc": "bez zálohy",
+    "freshGuarantee": "100% garance čerstvosti",
+    "freshGuaranteeDesc": "Není čerstvé? Plná náhrada, bez otázek",
+    "coldChain": "Chladicí řetězec",
+    "coldChainDesc": "Izolované tašky udrží mražené i chlazené produkty",
+    "secureCheckout": "Bezpečná platba",
+    "secureCheckoutDesc": "Karta, Apple Pay, Google Pay nebo dobírka"
   },
   "footer": {
     "catalog": "Katalog",
@@ -398,6 +404,20 @@
     "minOrder": "Min. objednávka",
     "delivery": "Doručení",
     "minutes": "min"
+  },
+  "howItWorks": {
+    "label": "Krajina Fresh Market",
+    "title": "Čerstvé potraviny ke dveřím",
+    "subtitle": "Tři jednoduché kroky od prohlížení po doručení",
+    "step1Title": "Prohlížejte a vyberte",
+    "step1Desc": "Vybírejte z 1 000+ čerstvých produktů a místních oblíbených",
+    "step2Title": "Zvolte čas",
+    "step2Desc": "Vyberte čas doručení nebo bezplatné vyzvednutí",
+    "step3Title": "Doručeno čerstvé",
+    "step3Desc": "Doručení s kontrolovanou teplotou za 30–90 min",
+    "pill1": "Doručení zdarma od €50",
+    "pill2": "Vyzvednutí vždy zdarma",
+    "pill3": "Od €2,50 za doručení"
   },
   "About": {
     "label": "Náš Příběh",

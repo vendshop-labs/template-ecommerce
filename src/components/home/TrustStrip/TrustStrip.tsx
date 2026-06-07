@@ -101,6 +101,25 @@ const RESTAURANT_ITEMS: TrustItem[] = [
   { id: 'freeBooking',      titleKey: 'freeBooking',      descKey: 'freeBookingDesc',      icon: <CalendarIcon /> },
 ];
 
+function SnowflakeIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" {...strokeProps} aria-hidden="true">
+      <path d="M2 12h20" />
+      <path d="M12 2v20" />
+      <path d="m20 16-4-4 4-4" />
+      <path d="m4 8 4 4-4 4" />
+      <path d="m16 4-4 4-4-4" />
+      <path d="m8 20 4-4 4 4" />
+    </svg>
+  );
+}
+
+const FOOD_MARKET_ITEMS: TrustItem[] = [
+  { id: 'freshGuarantee',  titleKey: 'freshGuarantee',  descKey: 'freshGuaranteeDesc',  icon: <LeafIcon /> },
+  { id: 'coldChain',       titleKey: 'coldChain',       descKey: 'coldChainDesc',       icon: <SnowflakeIcon /> },
+  { id: 'secureCheckout',  titleKey: 'secureCheckout',  descKey: 'secureCheckoutDesc',  icon: <ShieldIcon /> },
+];
+
 /**
  * "Trust Strip" — a row of four reassurance items (delivery, warranty,
  * payment, returns) shown near the bottom of the home page.
@@ -109,11 +128,16 @@ export default function TrustStrip() {
   const t = useTranslations('trust');
   const vConfig = useVerticalConfig();
 
-  const isRestaurant = vConfig.vertical === 'RESTAURANT' || vConfig.vertical === 'FOOD_MARKET';
-  const items = isRestaurant ? RESTAURANT_ITEMS : ECOMMERCE_ITEMS;
+  const items = vConfig.vertical === 'FOOD_MARKET'
+    ? FOOD_MARKET_ITEMS
+    : vConfig.vertical === 'RESTAURANT'
+      ? RESTAURANT_ITEMS
+      : ECOMMERCE_ITEMS;
+
+  const isDark = vConfig.vertical === 'RESTAURANT';
 
   return (
-    <section className={`${styles.section} ${isRestaurant ? styles.sectionDark : ''}`}>
+    <section className={`${styles.section} ${isDark ? styles.sectionDark : ''}`}>
       <div className={styles.wrap}>
         {items.map((item) => (
           <div className={styles.item} key={item.id}>

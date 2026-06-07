@@ -108,7 +108,13 @@
     "awardWinning": "Award Winning",
     "awardWinningDesc": "best Italian 2025",
     "freeBooking": "Free Booking",
-    "freeBookingDesc": "no deposit required"
+    "freeBookingDesc": "no deposit required",
+    "freshGuarantee": "100% freshness guarantee",
+    "freshGuaranteeDesc": "Not fresh? Full refund, no questions asked",
+    "coldChain": "Cold chain delivery",
+    "coldChainDesc": "Insulated bags keep frozen & chilled items safe",
+    "secureCheckout": "Secure checkout",
+    "secureCheckoutDesc": "Card, Apple Pay, Google Pay, or cash"
   },
   "footer": {
     "catalog": "Catalog",
@@ -398,6 +404,20 @@
     "minOrder": "Min. order",
     "delivery": "Delivery",
     "minutes": "min"
+  },
+  "howItWorks": {
+    "label": "Krajina Fresh Market",
+    "title": "Fresh groceries at your door",
+    "subtitle": "Three simple steps from browsing to delivery",
+    "step1Title": "Browse & pick",
+    "step1Desc": "Choose from 1,000+ fresh products and local favorites",
+    "step2Title": "Pick your slot",
+    "step2Desc": "Choose a delivery time or free in-store pickup",
+    "step3Title": "Delivered fresh",
+    "step3Desc": "Temperature-controlled delivery in 30–90 min",
+    "pill1": "Free delivery from €50",
+    "pill2": "Free pickup always",
+    "pill3": "From €2.50 delivery fee"
   },
   "About": {
     "label": "Our Story",

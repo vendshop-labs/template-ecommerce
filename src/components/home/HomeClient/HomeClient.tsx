@@ -9,6 +9,7 @@ import ProductOfDay from '@/components/home/ProductOfDay/ProductOfDay';
 import DeliveryZonesSection, { type ZoneData } from '@/components/home/DeliveryZonesSection/DeliveryZonesSection';
 
 const DailySpecials = dynamic(() => import('@/components/home/DailySpecials/DailySpecials'));
+const HowItWorksSection = dynamic(() => import('@/components/home/HowItWorksSection/HowItWorksSection'));
 const ReservationSection = dynamic(() => import('@/components/home/ReservationSection/ReservationSection'));
 const GallerySection = dynamic(() => import('@/components/home/GallerySection/GallerySection'));
 const AboutSection = dynamic(() => import('@/components/home/AboutSection/AboutSection'));
@@ -186,6 +187,9 @@ export default function HomeClient({ products, productOfDay, storeName, menuCate
             );
 
           case 'delivery-zones':
+            if (vConfig.vertical === 'FOOD_MARKET') {
+              return <HowItWorksSection key={section} />;
+            }
             if (!deliveryZones?.length) return null;
             return (
               <DeliveryZonesSection
