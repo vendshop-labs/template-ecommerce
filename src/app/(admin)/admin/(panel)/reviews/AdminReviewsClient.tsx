@@ -198,7 +198,7 @@ export default function AdminReviewsClient({ initialTestimonials, counts, aggreg
             <div className={styles.cardTop}>
               <div className={styles.customerInfo}>
                 <UserIcon />
-                <div>
+                <div className={styles.customerMeta}>
                   <span className={styles.customerName}>{t.customerName}</span>
                   <span className={styles.customerEmail}>{t.customerEmail}</span>
                 </div>

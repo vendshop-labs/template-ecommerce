@@ -1,6 +1,8 @@
 .page {
   padding: 28px 32px 48px;
   max-width: 1400px;
+  background: #f8fafc;
+  min-height: 100vh;
 }
 
 /* ── Header (title + filters left, summary right) ─── */
@@ -159,10 +161,10 @@
   min-width: 0;
 }
 
-.customerInfo > div {
+.customerMeta {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .customerName {
