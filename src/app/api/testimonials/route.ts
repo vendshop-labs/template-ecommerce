@@ -39,6 +39,7 @@ export async function GET(request: Request) {
       customerName: t.customer.name ?? 'Customer',
       locale: t.locale,
       createdAt: t.createdAt.toISOString(),
+      adminReply: t.adminReply,
     })),
     total,
     aggregate,
