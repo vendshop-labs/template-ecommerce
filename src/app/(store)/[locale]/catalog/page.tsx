@@ -91,10 +91,14 @@ export default async function CatalogRoute({
   const saleFilter = isSaleFilter ? { oldPrice: { not: null, gt: 0 } } : {};
   const genderWhere = genderFilter
     ? {
-        metadata: {
-          path: ['gender'],
-          equals: genderFilter.charAt(0).toUpperCase() + genderFilter.slice(1).toLowerCase(),
-        },
+        AND: [
+          {
+            OR: [
+              { metadata: { path: ['gender'], equals: genderFilter.charAt(0).toUpperCase() + genderFilter.slice(1).toLowerCase() } },
+              { metadata: { path: ['gender'], equals: 'Unisex' } },
+            ],
+          },
+        ],
       }
     : {};
 

@@ -60,10 +60,14 @@ export async function GET(request: Request) {
         : {}),
       ...(gender
         ? {
-            metadata: {
-              path: ['gender'],
-              equals: gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase(),
-            },
+            AND: [
+              {
+                OR: [
+                  { metadata: { path: ['gender'], equals: gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase() } },
+                  { metadata: { path: ['gender'], equals: 'Unisex' } },
+                ],
+              },
+            ],
           }
         : {}),
     };
