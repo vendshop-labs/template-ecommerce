@@ -24,6 +24,7 @@ export interface CatalogPageProps {
   initialQuery?: string;
   initialNewFilter?: boolean;
   initialSaleFilter?: boolean;
+  initialGender?: string;
 }
 
 interface ApiProduct {
@@ -77,6 +78,7 @@ export default function CatalogPage({
   initialQuery = '',
   initialNewFilter = false,
   initialSaleFilter = false,
+  initialGender = '',
 }: CatalogPageProps) {
   const t = useTranslations('catalog');
   const ts = useTranslations('sampleProducts');
@@ -95,7 +97,11 @@ export default function CatalogPage({
 
   const activeFilters = useRef<FilterState>({
     categories: initialCategory ? [initialCategory] : [],
-    brands: [], priceFrom: 0, priceTo: 25000, inStockOnly: false,
+    brands: [],
+    gender: initialGender,
+    priceFrom: 0,
+    priceTo: 25000,
+    inStockOnly: false,
   });
 
   const fetchProducts = useCallback(async (p: number, s: SortKey, filters: FilterState) => {
@@ -113,6 +119,7 @@ export default function CatalogPage({
       if (initialQuery) params.set('q', initialQuery);
       if (initialNewFilter) params.set('new', 'true');
       if (initialSaleFilter) params.set('sale', 'true');
+      if (filters.gender) params.set('gender', filters.gender);
 
       const res = await fetch(`/api/products?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch products');
@@ -214,6 +221,8 @@ export default function CatalogPage({
             onApply={handleFiltersApply}
             categoryRows={facets.categories}
             brandRows={facets.brands}
+            showGender={vertical === 'SHOE_MARKET'}
+            initialGender={initialGender}
           />
         )}
 

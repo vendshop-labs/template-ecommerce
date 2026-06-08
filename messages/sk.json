@@ -252,7 +252,12 @@
     "allergens": "Alergény",
     "deliveryTime": "Doručenie 30–45 min",
     "dineIn": "Jedenie na mieste",
-    "takeaway": "So sebou"
+    "takeaway": "So sebou",
+    "gender": "Pohlavie",
+    "genderAll": "Všetky",
+    "gender_men": "Muži",
+    "gender_women": "Ženy",
+    "gender_kids": "Deti"
   },
   "cart": {
     "title": "Košík",

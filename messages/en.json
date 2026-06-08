@@ -252,7 +252,12 @@
     "allergens": "Allergens",
     "deliveryTime": "Delivery 30–45 min",
     "dineIn": "Dine-in available",
-    "takeaway": "Takeaway available"
+    "takeaway": "Takeaway available",
+    "gender": "Gender",
+    "genderAll": "All",
+    "gender_men": "Men",
+    "gender_women": "Women",
+    "gender_kids": "Kids"
   },
   "cart": {
     "title": "Cart",

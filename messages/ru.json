@@ -252,7 +252,12 @@
     "allergens": "Аллергены",
     "deliveryTime": "Доставка 30–45 мин",
     "dineIn": "Возможно в зале",
-    "takeaway": "Навынос"
+    "takeaway": "Навынос",
+    "gender": "Пол",
+    "genderAll": "Все",
+    "gender_men": "Мужские",
+    "gender_women": "Женские",
+    "gender_kids": "Детские"
   },
   "cart": {
     "title": "Корзина",

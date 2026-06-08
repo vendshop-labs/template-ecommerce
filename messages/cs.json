@@ -252,7 +252,12 @@
     "allergens": "Alergeny",
     "deliveryTime": "Doručení 30–45 min",
     "dineIn": "Jídlo na místě",
-    "takeaway": "S sebou"
+    "takeaway": "S sebou",
+    "gender": "Pohlaví",
+    "genderAll": "Vše",
+    "gender_men": "Muži",
+    "gender_women": "Ženy",
+    "gender_kids": "Děti"
   },
   "cart": {
     "title": "Košík",

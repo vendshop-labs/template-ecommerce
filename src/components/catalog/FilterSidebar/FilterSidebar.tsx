@@ -8,11 +8,14 @@ export interface FilterSidebarProps {
   onApply?: (state: FilterState) => void;
   categoryRows?: { slug: string; count: number }[];
   brandRows?: { name: string; count: number }[];
+  showGender?: boolean;
+  initialGender?: string;
 }
 
 export interface FilterState {
   categories: string[];
   brands: string[];
+  gender: string;
   priceFrom: number;
   priceTo: number;
   inStockOnly: boolean;
@@ -75,7 +78,7 @@ function Checkbox({ checked, onChange, label, count }: {
   );
 }
 
-export default function FilterSidebar({ onApply, categoryRows, brandRows }: FilterSidebarProps) {
+export default function FilterSidebar({ onApply, categoryRows, brandRows, showGender, initialGender }: FilterSidebarProps) {
   const t = useTranslations('catalog');
   const tc = useTranslations('categories');
 
@@ -84,6 +87,7 @@ export default function FilterSidebar({ onApply, categoryRows, brandRows }: Filt
 
   const [cats, setCats] = useState<Record<string, boolean>>({});
   const [brands, setBrands] = useState<Record<string, boolean>>({});
+  const [gender, setGender] = useState(initialGender ?? '');
   const [inStock, setInStock] = useState(false);
   const [lo, setLo] = useState(PRICE_MIN);
   const [hi, setHi] = useState(PRICE_MAX);
@@ -91,16 +95,18 @@ export default function FilterSidebar({ onApply, categoryRows, brandRows }: Filt
   const reset = () => {
     setCats({});
     setBrands({});
+    setGender('');
     setInStock(false);
     setLo(PRICE_MIN);
     setHi(PRICE_MAX);
-    (onApply ?? (() => {}))({ categories: [], brands: [], priceFrom: PRICE_MIN, priceTo: PRICE_MAX, inStockOnly: false });
+    (onApply ?? (() => {}))({ categories: [], brands: [], gender: '', priceFrom: PRICE_MIN, priceTo: PRICE_MAX, inStockOnly: false });
   };
 
   const apply = () => {
     const state: FilterState = {
       categories: Object.keys(cats).filter((k) => cats[k]),
       brands: Object.keys(brands).filter((k) => brands[k]),
+      gender,
       priceFrom: lo,
       priceTo: hi,
       inStockOnly: inStock,
@@ -119,6 +125,25 @@ export default function FilterSidebar({ onApply, categoryRows, brandRows }: Filt
           {t('resetAll')}
         </button>
       </div>
+
+      {/* Gender (SHOE_MARKET only) */}
+      {showGender && (
+        <div className={styles.group}>
+          <h4 className={styles.groupTitle}>{t('gender')}</h4>
+          <div className={styles.genderChips}>
+            {(['', 'men', 'women', 'kids'] as const).map((g) => (
+              <button
+                key={g}
+                type="button"
+                className={`${styles.genderChip} ${gender === g ? styles.genderChipActive : ''}`}
+                onClick={() => setGender(g)}
+              >
+                {g === '' ? t('genderAll') : t(`gender_${g}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Category */}
       <div className={styles.group}>

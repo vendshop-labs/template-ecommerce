@@ -72,6 +72,7 @@ export default async function CatalogRoute({
   const searchQuery = typeof sp.q === 'string' ? sp.q.trim() : '';
   const isNewFilter = sp.new === 'true';
   const isSaleFilter = sp.sale === 'true';
+  const genderFilter = typeof sp.gender === 'string' ? sp.gender.trim() : '';
 
   const categoryFilter = initialCategory
     ? { category: { slug: initialCategory } }
@@ -88,8 +89,16 @@ export default async function CatalogRoute({
 
   const newFilter = isNewFilter ? { isNew: true } : {};
   const saleFilter = isSaleFilter ? { oldPrice: { not: null, gt: 0 } } : {};
+  const genderWhere = genderFilter
+    ? {
+        metadata: {
+          path: ['gender'],
+          equals: genderFilter.charAt(0).toUpperCase() + genderFilter.slice(1).toLowerCase(),
+        },
+      }
+    : {};
 
-  const baseWhere = { storeId: store.id, ...categoryFilter, ...searchFilter, ...newFilter, ...saleFilter };
+  const baseWhere = { storeId: store.id, ...categoryFilter, ...searchFilter, ...newFilter, ...saleFilter, ...genderWhere };
 
   const [dbProducts, total, categoryFacets, brandGroups] = await Promise.all([
     db.product.findMany({
@@ -160,6 +169,7 @@ export default async function CatalogRoute({
         initialQuery={searchQuery}
         initialNewFilter={isNewFilter}
         initialSaleFilter={isSaleFilter}
+        initialGender={genderFilter}
       />
     </>
   );

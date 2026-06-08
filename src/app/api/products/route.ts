@@ -18,6 +18,7 @@ export async function GET(request: Request) {
   const maxPrice = searchParams.get('maxPrice');
   const isNew = searchParams.get('new');
   const isSale = searchParams.get('sale');
+  const gender = searchParams.get('gender')?.trim() ?? '';
   const sort = searchParams.get('sort') ?? 'popular';
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
   const pageSize = Math.min(100, parseInt(searchParams.get('pageSize') ?? '12', 10));
@@ -55,6 +56,14 @@ export async function GET(request: Request) {
             AND: [
               { oldPrice: { gt: 0 } },
             ],
+          }
+        : {}),
+      ...(gender
+        ? {
+            metadata: {
+              path: ['gender'],
+              equals: gender.charAt(0).toUpperCase() + gender.slice(1).toLowerCase(),
+            },
           }
         : {}),
     };

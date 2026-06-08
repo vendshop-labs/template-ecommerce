@@ -319,3 +319,33 @@
 .apply:active {
   transform: translateY(0.5px);
 }
+
+/* ── Gender chips ───────────────────────────────────────────── */
+.genderChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.genderChip {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.genderChip:hover {
+  border-color: var(--color-primary);
+}
+
+.genderChipActive {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-contrast, #fff);
+}
