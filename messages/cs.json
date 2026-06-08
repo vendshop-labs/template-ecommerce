@@ -409,18 +409,18 @@
     "minutes": "min"
   },
   "howItWorks": {
-    "label": "Krajina Fresh Market",
-    "title": "Čerstvé potraviny ke dveřím",
-    "subtitle": "Tři jednoduché kroky od prohlížení po doručení",
-    "step1Title": "Prohlížejte a vyberte",
-    "step1Desc": "Vybírejte z 1 000+ čerstvých produktů a místních oblíbených",
-    "step2Title": "Zvolte čas",
-    "step2Desc": "Vyberte čas doručení nebo bezplatné vyzvednutí",
-    "step3Title": "Doručeno čerstvé",
-    "step3Desc": "Doručení s kontrolovanou teplotou za 30–90 min",
-    "pill1": "Doručení zdarma od €50",
-    "pill2": "Vyzvednutí vždy zdarma",
-    "pill3": "Od €2,50 za doručení"
+    "label": "Jak to funguje",
+    "title": "Nakupujte s jistotou",
+    "subtitle": "Tři jednoduché kroky od prohlížení po rozbalení",
+    "step1Title": "Prohlížejte a porovnejte",
+    "step1Desc": "Vyhledejte tisíce produktů, porovnejte parametry a přečtěte recenze",
+    "step2Title": "Bezpečná platba",
+    "step2Desc": "Plaťte kartou, na dobírku nebo digitální peněženkou",
+    "step3Title": "Rychlé doručení",
+    "step3Desc": "Sledované poštovní doručení za 2–5 pracovních dní",
+    "pill1": "Doprava zdarma od €75",
+    "pill2": "2letá záruka",
+    "pill3": "14 dní vrácení zdarma"
   },
   "About": {
     "label": "Náš Příběh",

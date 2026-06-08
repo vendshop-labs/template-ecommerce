@@ -409,18 +409,18 @@
     "minutes": "Min"
   },
   "howItWorks": {
-    "label": "Krajina Fresh Market",
-    "title": "Frische Lebensmittel an Ihre Tür",
-    "subtitle": "Drei einfache Schritte vom Stöbern bis zur Lieferung",
-    "step1Title": "Stöbern & auswählen",
-    "step1Desc": "Wählen Sie aus 1.000+ frischen Produkten und lokalen Favoriten",
-    "step2Title": "Zeitfenster wählen",
-    "step2Desc": "Lieferzeit wählen oder kostenlose Abholung im Laden",
-    "step3Title": "Frisch geliefert",
-    "step3Desc": "Temperaturkontrollierte Lieferung in 30–90 Min",
-    "pill1": "Kostenlose Lieferung ab €50",
-    "pill2": "Abholung immer kostenlos",
-    "pill3": "Ab €2,50 Liefergebühr"
+    "label": "So funktioniert es",
+    "title": "Sicher einkaufen",
+    "subtitle": "Drei einfache Schritte vom Stöbern bis zum Auspacken",
+    "step1Title": "Suchen & vergleichen",
+    "step1Desc": "Durchsuchen Sie Tausende von Produkten, vergleichen Sie Spezifikationen und lesen Sie Bewertungen",
+    "step2Title": "Sicher bezahlen",
+    "step2Desc": "Zahlen Sie sicher per Karte, Nachnahme oder digitaler Geldbörse",
+    "step3Title": "Schneller Versand",
+    "step3Desc": "Sendungsverfolgung per Post in 2–5 Werktagen bis zur Tür",
+    "pill1": "Kostenloser Versand ab €75",
+    "pill2": "2 Jahre Garantie",
+    "pill3": "14 Tage kostenlose Rückgabe"
   },
   "About": {
     "label": "Unsere Geschichte",

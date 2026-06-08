@@ -186,10 +186,10 @@ export default function HomeClient({ products, productOfDay, storeName, menuCate
               </section>
             );
 
+          case 'how-it-works':
+            return <HowItWorksSection key={section} />;
+
           case 'delivery-zones':
-            if (vConfig.vertical === 'FOOD_MARKET') {
-              return <HowItWorksSection key={section} />;
-            }
             if (!deliveryZones?.length) return null;
             return (
               <DeliveryZonesSection

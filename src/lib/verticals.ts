@@ -73,6 +73,7 @@ export type HomeSection =
   | 'subscribe'
   | 'trust-strip'
   | 'delivery-zones'
+  | 'how-it-works'
   | 'menu-categories'
   | 'daily-specials'
   | 'reservations'
@@ -100,11 +101,11 @@ export const VERTICAL_CONFIGS: Record<Vertical, VerticalConfig> = {
     },
     delivery: {
       modes: [
-        { mode: 'SHIPPING', label: 'Nova Poshta', enabled: true, icon: '📦' },
-        { mode: 'COURIER',  label: 'Courier',     enabled: true, icon: '🚴' },
-        { mode: 'PICKUP',   label: 'Pickup',      enabled: true, icon: '🏪' },
+        { mode: 'SHIPPING', label: 'Standard Post',    enabled: true, icon: '📦' },
+        { mode: 'COURIER',  label: 'Express Courier',  enabled: true, icon: '🚴' },
+        { mode: 'PICKUP',   label: 'Pickup Point',     enabled: true, icon: '🏪' },
       ],
-      showEstimatedTime: false,
+      showEstimatedTime: true,
       showZonesMap: false,
       defaultMinOrder: 0,
     },
@@ -115,7 +116,7 @@ export const VERTICAL_CONFIGS: Record<Vertical, VerticalConfig> = {
       paymentMethods: ['card', 'cod', 'liqpay', 'wayforpay'],
     },
     ui: {
-      homeSections: ['hero', 'categories', 'bestsellers', 'product-of-day', 'brands', 'popular-tags', 'trust-strip', 'subscribe'],
+      homeSections: ['hero', 'categories', 'bestsellers', 'product-of-day', 'how-it-works', 'brands', 'popular-tags', 'trust-strip', 'subscribe'],
       catalogStyle: 'grid',
       categoryDisplay: 'sidebar',
       addToCartLabel: 'Add to cart',
@@ -123,8 +124,8 @@ export const VERTICAL_CONFIGS: Record<Vertical, VerticalConfig> = {
     store: {
       showHours: false,
       showReservation: false,
-      defaultCurrency: 'UAH',
-      defaultRegion: 'UA',
+      defaultCurrency: 'EUR',
+      defaultRegion: 'DE',
     },
   },
 
@@ -162,7 +163,7 @@ export const VERTICAL_CONFIGS: Record<Vertical, VerticalConfig> = {
       paymentMethods: ['card', 'liqpay'],
     },
     ui: {
-      homeSections: ['hero', 'categories', 'daily-specials', 'bestsellers', 'delivery-zones', 'trust-strip'],
+      homeSections: ['hero', 'categories', 'daily-specials', 'bestsellers', 'how-it-works', 'delivery-zones', 'trust-strip'],
       catalogStyle: 'grid',
       categoryDisplay: 'chips',
       addToCartLabel: 'Add to basket',
