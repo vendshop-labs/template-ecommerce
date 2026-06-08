@@ -49,7 +49,16 @@
     "shopByCategory": "Купуйте за категорією",
     "findWhatYouNeed": "Знайдіть саме те, що потрібно",
     "browseAll": "Переглянути все",
-    "productsCount": "{count}+ товарів"
+    "productsCount": "{count}+ товарів",
+    "categoriesLabel": "КАТЕГОРІЇ",
+    "sneakers": "Кросівки",
+    "running": "Бігові",
+    "boots": "Черевики",
+    "sandals": "Сандалі",
+    "dress-shoes": "Класичне взуття",
+    "sport": "Спортивне",
+    "kids": "Дитяче",
+    "sale": "Знижки"
   },
   "product": {
     "addToCart": "До кошика",

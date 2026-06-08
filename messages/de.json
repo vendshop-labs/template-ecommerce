@@ -49,7 +49,16 @@
     "shopByCategory": "Nach Kategorie einkaufen",
     "findWhatYouNeed": "Finden Sie genau was Sie brauchen",
     "browseAll": "Alle ansehen",
-    "productsCount": "{count}+ Produkte"
+    "productsCount": "{count}+ Produkte",
+    "categoriesLabel": "KATEGORIEN",
+    "sneakers": "Sneakers",
+    "running": "Laufschuhe",
+    "boots": "Stiefel",
+    "sandals": "Sandalen",
+    "dress-shoes": "Elegante Schuhe",
+    "sport": "Sportschuhe",
+    "kids": "Kinderschuhe",
+    "sale": "Sale"
   },
   "product": {
     "addToCart": "In den Warenkorb",

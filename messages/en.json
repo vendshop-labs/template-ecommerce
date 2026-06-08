@@ -49,7 +49,16 @@
     "shopByCategory": "Shop by category",
     "findWhatYouNeed": "Find exactly what you need",
     "browseAll": "Browse all",
-    "productsCount": "{count}+ products"
+    "productsCount": "{count}+ products",
+    "categoriesLabel": "CATEGORIES",
+    "sneakers": "Sneakers",
+    "running": "Running",
+    "boots": "Boots",
+    "sandals": "Sandals",
+    "dress-shoes": "Dress Shoes",
+    "sport": "Sport",
+    "kids": "Kids",
+    "sale": "Sale"
   },
   "product": {
     "addToCart": "Add to cart",

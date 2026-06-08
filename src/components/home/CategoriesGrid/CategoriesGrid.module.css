@@ -332,3 +332,127 @@
     font-size: 1.5rem;
   }
 }
+
+/* ─── Shoe Market Categories ─────────────────────────────────── */
+
+.shoeSection {
+  padding: 56px 0;
+  background: var(--color-bg);
+}
+
+.shoeInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.shoeHeader {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.shoeLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.shoeTitle {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.shoeGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.shoeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  padding: 28px 16px;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.shoeCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.shoeCardSale {
+  border-color: var(--color-error);
+}
+
+.shoeCardSale:hover {
+  border-color: var(--color-error);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-error) 15%, transparent);
+}
+
+.shoeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-primary);
+}
+
+.shoeIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.shoeIconSale {
+  color: var(--color-error);
+}
+
+.shoeName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.shoeNameSale {
+  color: var(--color-error);
+}
+
+@media (max-width: 767px) {
+  .shoeSection {
+    padding: 40px 0;
+  }
+
+  .shoeGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .shoeCard {
+    padding: 20px 12px;
+  }
+
+  .shoeTitle {
+    font-size: 22px;
+  }
+}

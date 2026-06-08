@@ -49,7 +49,16 @@
     "shopByCategory": "Kupuj według kategorii",
     "findWhatYouNeed": "Znajdź dokładnie to, czego szukasz",
     "browseAll": "Przeglądaj wszystko",
-    "productsCount": "{count}+ produktów"
+    "productsCount": "{count}+ produktów",
+    "categoriesLabel": "KATEGORIE",
+    "sneakers": "Sneakersy",
+    "running": "Biegowe",
+    "boots": "Botki",
+    "sandals": "Sandały",
+    "dress-shoes": "Eleganckie",
+    "sport": "Sportowe",
+    "kids": "Dziecięce",
+    "sale": "Wyprzedaż"
   },
   "product": {
     "addToCart": "Dodaj do koszyka",

@@ -49,7 +49,16 @@
     "shopByCategory": "Nakupujte podle kategorie",
     "findWhatYouNeed": "Najděte přesně to, co potřebujete",
     "browseAll": "Zobrazit vše",
-    "productsCount": "{count}+ produktů"
+    "productsCount": "{count}+ produktů",
+    "categoriesLabel": "KATEGORIE",
+    "sneakers": "Tenisky",
+    "running": "Běžecké",
+    "boots": "Boty",
+    "sandals": "Sandály",
+    "dress-shoes": "Společenské",
+    "sport": "Sportovní",
+    "kids": "Dětské",
+    "sale": "Výprodej"
   },
   "product": {
     "addToCart": "Do košíku",

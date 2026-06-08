@@ -49,7 +49,16 @@
     "shopByCategory": "Покупайте по категории",
     "findWhatYouNeed": "Найдите именно то, что нужно",
     "browseAll": "Смотреть все",
-    "productsCount": "{count}+ товаров"
+    "productsCount": "{count}+ товаров",
+    "categoriesLabel": "КАТЕГОРИИ",
+    "sneakers": "Кроссовки",
+    "running": "Беговые",
+    "boots": "Ботинки",
+    "sandals": "Сандалии",
+    "dress-shoes": "Классическая обувь",
+    "sport": "Спортивная",
+    "kids": "Детская",
+    "sale": "Скидки"
   },
   "product": {
     "addToCart": "В корзину",
