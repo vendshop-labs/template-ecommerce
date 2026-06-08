@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import HomeClient, { type ProductData } from '@/components/home/HomeClient/HomeClient';
 import { db } from '@/lib/db';
@@ -7,6 +8,17 @@ import { getBaseUrl } from '@/lib/url';
 export const revalidate = 60;
 
 const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
+
+const getHitProducts = unstable_cache(
+  (storeId: string) =>
+    db.product.findMany({
+      where: { storeId, isHit: true, inStock: true },
+      orderBy: { rating: 'desc' },
+      take: 3,
+    }),
+  ['daily-specials'],
+  { tags: ['products'], revalidate: 60 },
+);
 
 export default async function HomePage({
   params,
@@ -159,11 +171,8 @@ export default async function HomePage({
   }));
 
   // Fetch top hit products as daily specials (all verticals)
-  const dbSpecials = await db.product.findMany({
-    where: { storeId: store.id, isHit: true, inStock: true },
-    orderBy: { rating: 'desc' },
-    take: 3,
-  });
+  // unstable_cache with tag 'products' ensures instant revalidation on price updates
+  const dbSpecials = await getHitProducts(store.id);
 
   const BADGE_MAP_RESTAURANT = ['chef', 'popular', 'new'] as const;
   const BADGE_MAP_DEFAULT = ['new', 'popular', 'new'] as const;
