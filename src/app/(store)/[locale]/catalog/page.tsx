@@ -10,10 +10,10 @@ import { routing } from '@/i18n/routing';
 import { getStoreConfig } from '@/lib/store-config';
 import JsonLd from '@/components/seo/JsonLd';
 import { buildBreadcrumbSchema } from '@/lib/breadcrumbs';
+import { STORE_SLUG } from '@/lib/env';
 
 export const revalidate = 60;
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 const PAGE_SIZE = 12;
 
 export async function generateMetadata({

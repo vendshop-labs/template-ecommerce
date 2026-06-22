@@ -4,10 +4,10 @@ import HomeClient, { type ProductData } from '@/components/home/HomeClient/HomeC
 import { db } from '@/lib/db';
 import JsonLd from '@/components/seo/JsonLd';
 import { getBaseUrl } from '@/lib/url';
+import { STORE_SLUG } from '@/lib/env';
 
 export const revalidate = 60;
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 const getHitProducts = unstable_cache(
   (storeId: string) =>

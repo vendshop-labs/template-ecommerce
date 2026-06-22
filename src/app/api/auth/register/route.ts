@@ -6,8 +6,8 @@ import {
   CUSTOMER_TOKEN_MAX_AGE,
   createCustomerToken,
 } from '@/lib/customerAuth';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export async function POST(request: Request) {
   try {

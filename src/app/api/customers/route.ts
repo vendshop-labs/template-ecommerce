@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { cookies } from 'next/headers';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 // GET /api/customers — admin only list
 export async function GET(request: Request) {

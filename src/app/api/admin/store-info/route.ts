@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
 import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { revalidateStorefront } from '@/lib/revalidate';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export async function GET() {
   const cookieStore = await cookies();

@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
 import { getVerticalConfig, type VerticalConfig } from '@/lib/verticals';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export type StoreMode = 'PHYSICAL' | 'ONLINE' | 'HYBRID';
 

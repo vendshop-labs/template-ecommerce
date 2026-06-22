@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'default';
 
 export async function GET() {
   const store = await db.store.findUnique({ where: { slug: STORE_SLUG } });

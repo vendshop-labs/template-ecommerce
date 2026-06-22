@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import DashboardClient from './DashboardClient';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export default async function AdminDashboardPage() {
   const store = await db.store.findUnique({

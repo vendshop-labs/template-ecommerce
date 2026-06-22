@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import AdminReviewsClient from './AdminReviewsClient';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export default async function AdminReviewsPage() {
   const store = await db.store.findUnique({ where: { slug: STORE_SLUG } });

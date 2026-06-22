@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
 import AdminSidebar from '@/components/admin/AdminSidebar/AdminSidebar';
 import styles from './admin.module.css';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   const store = await db.store.findUnique({

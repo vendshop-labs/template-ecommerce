@@ -10,8 +10,8 @@ import {
 } from '@/lib/image-utils';
 import path from 'path';
 import fs from 'fs/promises';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 const PURPOSE_VARIANTS: Record<string, ImageVariant[]> = {
   gallery: GALLERY_VARIANTS,

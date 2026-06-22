@@ -3,8 +3,8 @@ import { Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { cookies } from 'next/headers';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 // GET /api/products — list with optional filters
 export async function GET(request: Request) {

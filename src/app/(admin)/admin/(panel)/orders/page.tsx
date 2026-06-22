@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
 import OrdersClient from './OrdersClient';
 import type { AdminOrder } from '@/components/admin/orderTypes';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export default async function OrdersPage() {
   const store = await db.store.findUnique({

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
 import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
+import { STORE_SLUG } from '@/lib/env';
 
 interface ReservationBody {
   date: string;

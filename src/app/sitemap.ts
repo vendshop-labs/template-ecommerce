@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 import { routing } from '@/i18n/routing';
 import { db } from '@/lib/db';
 import { getBaseUrl } from '@/lib/url';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();

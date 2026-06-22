@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateEmbedding, semanticSearch } from '@/lib/embeddings';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 // POST /api/products/search — hybrid semantic + filter search
 export async function POST(request: Request) {

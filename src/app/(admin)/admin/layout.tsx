@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { db } from '@/lib/db';
 import '../../globals.css';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await db.store.findUnique({

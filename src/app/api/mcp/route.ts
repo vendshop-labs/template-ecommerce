@@ -7,8 +7,8 @@ import { OrderStatus, PaymentStatus, PromoType } from '@prisma/client';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
 import { getVerticalConfig } from '@/lib/verticals';
 import { THEME_PRESETS } from '@/lib/theme-presets';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 // ─── Tool result helper ────────────────────────────────────────────────────
 function text(content: unknown) {

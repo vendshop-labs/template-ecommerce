@@ -3,8 +3,8 @@ import { db } from '@/lib/db';
 import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { cookies } from 'next/headers';
 import { Prisma, DeliveryMode, OrderStatus, PaymentStatus } from '@prisma/client';
+import { STORE_SLUG } from '@/lib/env';
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 interface CartItem {
   id: string;

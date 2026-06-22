@@ -9,10 +9,10 @@ import { getBaseUrl } from '@/lib/url';
 import { routing } from '@/i18n/routing';
 import JsonLd from '@/components/seo/JsonLd';
 import { buildBreadcrumbSchema } from '@/lib/breadcrumbs';
+import { STORE_SLUG } from '@/lib/env';
 
 export const revalidate = 60;
 
-const STORE_SLUG = process.env.STORE_SLUG ?? 'electromarket';
 
 export async function generateMetadata({
   params,
