@@ -16,8 +16,8 @@ const getHitProducts = unstable_cache(
       orderBy: { rating: 'desc' },
       take: 3,
     }),
-  ['daily-specials'],
-  { tags: ['products'], revalidate: 60 },
+  ['daily-specials', STORE_SLUG],
+  { tags: ['products', STORE_SLUG], revalidate: 60 },
 );
 
 export default async function HomePage({

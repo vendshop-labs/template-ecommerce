@@ -1,4 +1,5 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { STORE_SLUG } from '@/lib/env';
 
 const LOCALES = ['en', 'de', 'sk', 'cs', 'uk', 'ru', 'pl'];
 
@@ -8,6 +9,8 @@ export function revalidateStorefront() {
     revalidatePath(`/${locale}`);
   }
   revalidateTag('products');
+  revalidateTag('store-config');
+  revalidateTag(STORE_SLUG);
 }
 
 export function revalidateCatalog() {
