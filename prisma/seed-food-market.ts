@@ -15,6 +15,8 @@ async function main() {
   const store = await db.store.upsert({
     where: { slug: 'krajina' },
     update: {
+      vertical: Vertical.FOOD_MARKET,
+      name: 'Krajina Fresh Market',
       primaryMode: 'HYBRID',
       address: 'Marktstraße 15',
       city: 'Berlin',

@@ -14,7 +14,7 @@ async function main() {
   // ============ STORE ============
   const store = await db.store.upsert({
     where: { slug: 'electromarket' },
-    update: {},
+    update: { vertical: Vertical.ECOMMERCE, name: 'ElectroMarket' },
     create: {
       name: 'ElectroMarket',
       slug: 'electromarket',

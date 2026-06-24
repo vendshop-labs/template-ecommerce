@@ -15,6 +15,8 @@ async function main() {
   const store = await db.store.upsert({
     where: { slug: 'stepstyle' },
     update: {
+      vertical: Vertical.SHOE_MARKET,
+      name: 'StepStyle',
       primaryMode: 'ONLINE',
       phone: '+49 30 9876 5432',
       email: 'hello@stepstyle.eu',
