@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
 import { revalidateCatalog } from '@/lib/revalidate';
 import { db } from '@/lib/db';
+import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { OrderStatus, PaymentStatus, PromoType } from '@prisma/client';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
 import { getVerticalConfig } from '@/lib/verticals';
@@ -696,6 +698,12 @@ async function handleAnthropic(
 
 // ─── POST /api/admin/chat ─────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_COOKIE)?.value;
+  if (!await verifyAdminToken(token, getAdminSecret())) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const openaiKey    = process.env.OPENAI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 

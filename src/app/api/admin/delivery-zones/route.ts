@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
+import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { STORE_SLUG } from '@/lib/env';
 
 
@@ -15,6 +17,12 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_COOKIE)?.value;
+  if (!await verifyAdminToken(token, getAdminSecret())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const store = await db.store.findUnique({ where: { slug: STORE_SLUG } });
   if (!store) return NextResponse.json({ error: 'Store not found' }, { status: 404 });
 

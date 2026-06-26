@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { db } from '@/lib/db';
+import { verifyAdminToken, getAdminSecret, ADMIN_COOKIE } from '@/lib/adminAuth';
 import { DEFAULT_THEME, type ThemeConfig } from '@/lib/theme';
 import { STORE_SLUG } from '@/lib/env';
 
@@ -21,6 +23,12 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ADMIN_COOKIE)?.value;
+  if (!await verifyAdminToken(token, getAdminSecret())) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = (await req.json()) as Partial<ThemeConfig>;
 
   const store = await db.store.findUniqueOrThrow({
