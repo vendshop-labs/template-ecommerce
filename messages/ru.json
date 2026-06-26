@@ -536,5 +536,12 @@
     "errorInvalidCredentials": "Неверный email или пароль",
     "myAccount": "Мой аккаунт",
     "greeting": "Привет, {name}"
+  },
+  "CookieBanner": {
+    "ariaLabel": "Согласие на использование файлов cookie",
+    "message": "Мы используем файлы cookie для улучшения вашего опыта",
+    "privacyLink": "Политика конфиденциальности",
+    "reject": "Отклонить",
+    "acceptAll": "Принять все"
   }
 }

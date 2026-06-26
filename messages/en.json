@@ -536,5 +536,12 @@
     "errorInvalidCredentials": "Invalid email or password",
     "myAccount": "My Account",
     "greeting": "Hello, {name}"
+  },
+  "CookieBanner": {
+    "ariaLabel": "Cookie consent",
+    "message": "We use cookies to improve your experience",
+    "privacyLink": "Privacy Policy",
+    "reject": "Reject",
+    "acceptAll": "Accept all"
   }
 }

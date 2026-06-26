@@ -536,5 +536,12 @@
     "errorInvalidCredentials": "Невірний email або пароль",
     "myAccount": "Мій акаунт",
     "greeting": "Привіт, {name}"
+  },
+  "CookieBanner": {
+    "ariaLabel": "Згода на використання файлів cookie",
+    "message": "Ми використовуємо файли cookie для покращення вашого досвіду",
+    "privacyLink": "Політика конфіденційності",
+    "reject": "Відхилити",
+    "acceptAll": "Прийняти всі"
   }
 }

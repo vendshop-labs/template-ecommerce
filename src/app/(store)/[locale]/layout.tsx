@@ -12,6 +12,7 @@ import { VerticalProvider } from '@/lib/vertical-context';
 import { PresenceProvider } from '@/lib/presence-context';
 import { CustomerProvider } from '@/lib/useCustomer';
 import { getBaseUrl } from '@/lib/url';
+import CookieBanner from '@/components/ui/CookieBanner/CookieBanner';
 import '../../globals.css';
 
 const playfair = Playfair_Display({
@@ -111,6 +112,7 @@ export default async function LocaleLayout({
                 <Header storeName={config.name} vertical={config.vertical.vertical} />
                 <main>{children}</main>
                 <Footer storeName={config.name} vertical={config.vertical.vertical} />
+                <CookieBanner />
               </PresenceProvider>
             </VerticalProvider>
           </CustomerProvider>

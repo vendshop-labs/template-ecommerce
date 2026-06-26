@@ -536,5 +536,12 @@
     "errorInvalidCredentials": "Nesprávny email alebo heslo",
     "myAccount": "Môj účet",
     "greeting": "Ahoj, {name}"
+  },
+  "CookieBanner": {
+    "ariaLabel": "Súhlas s cookies",
+    "message": "Používame cookies na zlepšenie vášho zážitku",
+    "privacyLink": "Zásady ochrany osobných údajov",
+    "reject": "Odmietnuť",
+    "acceptAll": "Prijať všetko"
   }
 }

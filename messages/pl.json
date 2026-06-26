@@ -536,5 +536,12 @@
     "errorInvalidCredentials": "Nieprawidłowy email lub hasło",
     "myAccount": "Moje konto",
     "greeting": "Cześć, {name}"
+  },
+  "CookieBanner": {
+    "ariaLabel": "Zgoda na pliki cookie",
+    "message": "Używamy plików cookie, aby poprawić Twoje doświadczenia",
+    "privacyLink": "Polityka prywatności",
+    "reject": "Odrzuć",
+    "acceptAll": "Zaakceptuj wszystkie"
   }
 }
