@@ -1,7 +1,7 @@
 'use client';
 
 import { Link } from '@/i18n/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useVerticalConfig } from '@/lib/vertical-context';
 import { useStorePresence } from '@/lib/presence-context';
 import type { Vertical } from '@prisma/client';
@@ -130,6 +130,8 @@ export default function Footer({
   vertical,
 }: FooterProps) {
   const t = useTranslations('footer');
+  const locale = useLocale();
+  const isDe = locale === 'de';
   const tc = useTranslations('categories');
   const tMenu = useTranslations('menuCategories');
   const vConfig = useVerticalConfig();
@@ -354,6 +356,12 @@ export default function Footer({
             <a className={styles.bottomLink} href={isRestaurant ? '/terms' : '/offer'}>
               {isRestaurant ? t('termsLink') : t('offer')}
             </a>
+            {isDe && (
+              <>
+                <a className={styles.bottomLink} href="/impressum">Impressum</a>
+                <a className={styles.bottomLink} href="/datenschutz">Datenschutz</a>
+              </>
+            )}
           </span>
         </div>
       </div>

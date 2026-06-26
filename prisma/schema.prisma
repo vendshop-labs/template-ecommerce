@@ -43,6 +43,7 @@ model Store {
   restaurantTables RestaurantTable[]
   galleryImages    GalleryImage[]
   testimonials     Testimonial[]
+  legalConfig      LegalConfig?
 }
 
 enum Vertical {
@@ -388,6 +389,24 @@ model Testimonial {
   @@index([storeId, status])
   @@index([storeId, createdAt])
   @@index([customerId])
+}
+
+// ============ LEGAL CONFIG ============
+
+model LegalConfig {
+  id          String  @id @default(cuid())
+  storeId     String  @unique
+  store       Store   @relation(fields: [storeId], references: [id])
+  enabled     Boolean @default(false)
+  companyName String  @default("")
+  street      String  @default("")
+  zip         String  @default("")
+  city        String  @default("")
+  country     String  @default("Deutschland")
+  email       String  @default("")
+  phone       String  @default("")
+  vatId       String  @default("")
+  updatedAt   DateTime @updatedAt
 }
 
 // ============ ADMIN AUTH ============
